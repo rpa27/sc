@@ -280,9 +280,9 @@ textarea:focus{outline:none;border-color:var(--accent)}
       <div class="ctr"><span id="ctr">0</span> / 200</div>
     </div>
     <div id="pinSet">
-      <div class="fl">비밀번호 <em>내 일정 열기·수정용</em></div>
-      <input id="fPin" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="숫자 2자리 이상" autocomplete="new-password">
-      <div class="pinhint">숫자 2자리 이상만 가능해요 · 수정할 때 이 비밀번호를 넣어야 해요</div>
+      <div class="fl">내 비밀번호 설정 <em>최초 1회</em></div>
+      <input id="fPin" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="숫자 3자리 이상" autocomplete="new-password">
+      <div class="pinhint">숫자 3자리 이상만 가능해요 · 한 번 정하면 계속 이 비밀번호를 써요</div>
     </div>
   </div>
   <div class="sf">
@@ -329,6 +329,7 @@ function load(){try{const s=localStorage.getItem(KEY);if(s)return JSON.parse(s)}
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}}
 let DB=load();
 if(!DB)DB={days:{}};
+let _lp=DB.pins||{};
 
 // state
 const today=new Date();today.setHours(0,0,0,0);
@@ -462,19 +463,29 @@ let MYID=null;
 function deviceId(){try{let v=localStorage.getItem('kaa-sched-dev');if(!v){v='dev_'+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem('kaa-sched-dev',v)}return v}catch(e){return 'dev_tmp'}}
 MYID=deviceId();
 let MODE={k:'new'};
-const OPENED=new Set();const kOf=(d,id)=>d+'_'+id;
+// 개인 비밀번호: 이름별로 최초 1회 설정 → 계속 사용, 본인이 기존 비밀번호로 재설정
+let PINS={};               // {memberId: hash}
+const OPENED=new Set();    // 이번 접속에서 본인 확인된 이름
+const PINRE=/^\d{3,}$/;
 async function sha(t){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('kaa-sched:'+t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){return 'p'+t}}
-function canSeeMemo(d,id){const e=(DB.days[d]||{})[id];return !!e&&(unlocked||OPENED.has(kOf(d,id)))}
+const pinHash=(id,v)=>sha(id+':'+v);
+function canSeeMemo(d,id){const e=(DB.days[d]||{})[id];return !!e&&(unlocked||OPENED.has(id))}
 function sheetMode(e,id){
-  const isToday=sel===ymd(today);
-  if(!e)return isToday?{k:'new',msg:'저장 후 오늘 안에 수정은 1번만 할 수 있어요',pinSet:true}:{k:'ro',msg:'일정은 당일에만 입력할 수 있어요',foot:'당일에만 입력할 수 있어요'};
-  const own=OPENED.has(kOf(sel,id));
-  if(!e.pin&&!own)return {k:'ro',msg:unlocked?'전체 보기 중이에요':'비밀번호 없이 저장된 예전 일정이에요 · 팀장 확인 후 다시 입력해 주세요',foot:'보기 전용이에요'};
+  const isToday=sel===ymd(today),has=!!PINS[id],own=OPENED.has(id);
+  if(!e){
+    if(!isToday)return {k:'ro',msg:'일정은 당일에만 입력할 수 있어요',foot:'당일에만 입력할 수 있어요'};
+    if(!has)return {k:'new',msg:'처음 입력이에요 · 아래에서 내 비밀번호를 정해 주세요',pinSet:true};
+    if(!own)return {k:'ro',lock:true,msg:'🔒 본인 비밀번호를 넣으면 입력할 수 있어요',foot:'본인 비밀번호로 열 수 있어요'};
+    return {k:'new',msg:'저장 후 오늘 안에 수정은 1번만 할 수 있어요'};
+  }
+  if(!has)return {k:'ro',msg:unlocked?'전체 보기 중이에요':'비밀번호 없이 저장된 예전 일정이에요 · 팀장 확인 후 다시 입력해 주세요',foot:'보기 전용이에요'};
   if(!own)return {k:'ro',lock:true,msg:unlocked?'전체 보기 중이에요 · 수정은 본인 비밀번호로 열어야 해요':'🔒 본인 비밀번호를 넣으면 내용 보기·수정을 할 수 있어요',foot:'본인 비밀번호로 열 수 있어요'};
   if(!isToday)return {k:'ro',msg:'지난 일정은 수정할 수 없어요',foot:'당일에만 수정할 수 있어요'};
   if((e.edits||0)>=1)return {k:'ro',msg:'수정 기회를 모두 사용했어요 (남은 수정 0번)',foot:'수정 기회를 모두 사용했어요'};
-  return {k:'edit',msg:'수정 1번 남았어요',pinSet:!e.pin};
+  return {k:'edit',msg:'수정 1번 남았어요'};
 }
+const pinInput=(id,ph)=>`<input id="${id}" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="${ph}" autocomplete="off">`;
+function digitsOnly(el){el.addEventListener('input',()=>{el.value=el.value.replace(/\D/g,'')})}
 function applyMode(){
   const e=(DB.days[sel]||{})[cur.id];MODE=sheetMode(e,cur.id);
   const ro=MODE.k==='ro';$('#shBody').classList.toggle('ro',ro);$('#fMemo').readOnly=ro;
@@ -482,14 +493,24 @@ function applyMode(){
   $('#shSave').hidden=ro;$('#shNote').hidden=!ro;$('#shNote').textContent=ro?(MODE.foot||'보기 전용이에요'):'';
   $('#shDel').hidden=!(e&&unlocked);
   $('#pinSet').hidden=!MODE.pinSet;$('#fPin').value='';
-  const po=$('#pinOpen');
-  if(MODE.lock){
-    po.innerHTML=`<div class="unl"><input id="pinIn" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="내 비밀번호 (숫자 2자리 이상)" autocomplete="off"><button id="pinGo">열기</button></div>`;
-    const go=async()=>{const v=$('#pinIn').value;if(!/^\d{2,}$/.test(v)){$('#pinIn').classList.add('err');return}
-      if(await sha(v)===e.pin){OPENED.add(kOf(sel,cur.id));draft=JSON.parse(JSON.stringify(e));applyMode();renderForm();renderDay();toast('내 일정을 열었어요')}
-      else{const i=$('#pinIn');i.classList.add('err');i.value='';i.placeholder='비밀번호가 달라요'}};
-    $('#pinGo').onclick=go;$('#pinIn').onkeydown=ev=>{if(ev.key==='Enter')go()};
-  }else po.innerHTML='';
+  const po=$('#pinOpen');let h='';
+  if(MODE.lock)h+=`<div class="unl">${pinInput('pinIn','내 비밀번호 (숫자 3자리 이상)')}<button id="pinGo">열기</button></div>`;
+  if(PINS[cur.id])h+=`<div class="lockmsg" style="margin:${MODE.lock?'0':'0'}"><span></span><button id="pinRs">비밀번호 재설정</button></div><div id="rsBox"></div>`;
+  po.innerHTML=h;
+  if(MODE.lock){const i=$('#pinIn');digitsOnly(i);
+    const go=async()=>{const v=i.value;if(!PINRE.test(v)){i.classList.add('err');i.value='';i.placeholder='숫자 3자리 이상 넣어 주세요';return}
+      if(await pinHash(cur.id,v)===PINS[cur.id]){OPENED.add(cur.id);const x=(DB.days[sel]||{})[cur.id];if(x)draft=JSON.parse(JSON.stringify(x));applyMode();renderForm();renderDay();toast('본인 확인됐어요')}
+      else{i.classList.add('err');i.value='';i.placeholder='비밀번호가 달라요'}};
+    $('#pinGo').onclick=go;i.onkeydown=ev=>{if(ev.key==='Enter')go()};}
+  if(PINS[cur.id])$('#pinRs').onclick=()=>{const b=$('#rsBox');if(b.innerHTML){b.innerHTML='';return}
+    b.innerHTML=`<div class="sub" style="margin-bottom:4px"><div class="fl" style="margin:0">비밀번호 재설정</div>${pinInput('rsOld','지금 비밀번호')}${pinInput('rsNew','새 비밀번호 (숫자 3자리 이상)')}<div class="pinhint" style="margin-top:0">숫자 3자리 이상만 가능해요</div><button class="save" id="rsGo" style="height:46px;font-size:15px">변경하기</button></div>`;
+    ['rsOld','rsNew'].forEach(k=>digitsOnly($('#'+k)));
+    $('#rsGo').onclick=async()=>{const o=$('#rsOld'),n=$('#rsNew');
+      if(await pinHash(cur.id,o.value)!==PINS[cur.id]){o.classList.add('err');o.value='';o.placeholder='지금 비밀번호가 달라요';return}
+      if(!PINRE.test(n.value)){n.classList.add('err');n.value='';n.placeholder='숫자 3자리 이상 넣어 주세요';return}
+      const h2=await pinHash(cur.id,n.value);
+      try{await savePin(cur.id,h2);PINS[cur.id]=h2;OPENED.add(cur.id);b.innerHTML='';toast('비밀번호를 바꿨어요');applyMode();renderForm()}catch(err){toast('변경에 실패했어요. 다시 시도해 주세요')}};
+  };
   setMemoField(e);
 }
 function closeSheet(){$('#scrim').classList.remove('on');$('#sheet').classList.remove('on');document.body.style.overflow=''}
@@ -527,7 +548,7 @@ function placeMissing(o,p){
 }
 function valid(){return !missing()}
 function missing(){
-  if(MODE.pinSet&&!/^\d{2,}$/.test($('#fPin').value))return '비밀번호를 숫자 2자리 이상 넣어 주세요';
+  if(MODE.pinSet&&!PINRE.test($('#fPin').value))return '비밀번호를 숫자 3자리 이상 정해 주세요';
   if(draft.out<=draft.in)return '퇴근 시간을 확인해 주세요';
   if(!draft.type)return '영업구분을 선택해 주세요';
   return placeMissing(draft,draft.pm?'오전 ':'')||(draft.pm?placeMissing(draft.pm,'오후 '):'');
@@ -548,8 +569,9 @@ $('#shSave').onclick=async()=>{
   const prev=(DB.days[sel]||{})[cur.id];
   draft.memo=$('#fMemo').value.slice(0,200).trim();
   draft.uid=(prev&&prev.uid)||MYID;draft.edits=prev?(prev.edits||0)+1:0;
-  if(MODE.pinSet)draft.pin=await sha($('#fPin').value);else if(prev&&prev.pin)draft.pin=prev.pin;
-  OPENED.add(kOf(sel,cur.id));
+  delete draft.pin;
+  if(MODE.pinSet){const h=await pinHash(cur.id,$('#fPin').value);try{await savePin(cur.id,h)}catch(err){toast('비밀번호 저장에 실패했어요. 다시 시도해 주세요');return}PINS[cur.id]=h}
+  OPENED.add(cur.id);
   const clean=o=>{if(o.place==='내부'){delete o.region;delete o.zone}else{delete o.office;if(!ZONES[o.region])delete o.zone}};clean(draft);if(draft.pm){clean(draft.pm);if(!moved(draft))delete draft.pm}
   const who=cur,day=sel,body=draft;(DB.days[day]=DB.days[day]||{})[who.id]=body;closeSheet();renderAll();
   saveEntry(day,who.id,body).then(()=>toast(body.edits?'수정했어요 · 남은 수정 0번':'저장했어요 · 오늘 안에 1번 수정할 수 있어요')).catch(()=>toast('저장에 실패했어요. 다시 시도해 주세요'));
@@ -562,7 +584,7 @@ function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('on');c
 
 
 // 내용 보기 잠금 (작성은 누구나, 보기는 비밀번호)
-const VIEW_PW='12';
+const VIEW_PW='478';
 let unlocked=false;
 function unlockUI(box,onOk){
   box.innerHTML=`<div class="unl"><input type="password" inputmode="numeric" autocomplete="off" placeholder="비밀번호 입력" aria-label="내용 보기 비밀번호"><button>확인</button></div>`;
@@ -588,6 +610,10 @@ async function saveEntry(day,id,body){
   if(REMOTE){await REMOTE.collection('sched').doc(day+'_'+id).set(Object.assign({},body,{date:day,member:id,savedAt:Date.now()}));return}
   persist();
 }
+async function savePin(id,h){
+  if(REMOTE){await REMOTE.collection('pins').doc(id).set({h,at:Date.now()});return}
+  DB.pins=DB.pins||{};DB.pins[id]=h;persist();
+}
 async function removeEntry(day,id){
   if(REMOTE){await REMOTE.collection('sched').doc(day+'_'+id).delete();return}
   persist();
@@ -598,8 +624,9 @@ async function initRemote(){
   let db=null;try{db=await window.claude.use('db')}catch(e){}
   if(!db){setSync('warn','이 기기에만 저장돼요');return}
   try{const u=await window.claude.use('user');if(u){const id=await u.id();if(id)MYID=id;const w=await u.can('data.write');if(w===false)READONLY=true;}}catch(e){}
-  REMOTE=db;DB={days:{}};renderAll();setSync('','팀 데이터 불러오는 중');
+  REMOTE=db;DB={days:{}};PINS={};renderAll();setSync('','팀 데이터 불러오는 중');
   const timer=setTimeout(()=>setSync('warn','팀 데이터 연결이 늦어지고 있어요'),10000);
+  db.collection('pins').onSnapshot(snap=>{const p={};snap.docs.forEach(d=>{const v=d.data();if(v&&v.h)p[d.id]=v.h});PINS=p;if($('#sheet').classList.contains('on')){}},()=>{});
   db.collection('sched').onSnapshot(snap=>{
     const days={};
     snap.docs.forEach(d=>{const v=d.data();if(!v||!v.date||!v.member)return;const e=Object.assign({},v);delete e.date;delete e.member;delete e.savedAt;(days[v.date]=days[v.date]||{})[v.member]=e});
@@ -609,6 +636,7 @@ async function initRemote(){
 }
 
 addEventListener('resize',()=>{clearTimeout(window._rz);window._rz=setTimeout(renderMap,150)});
+PINS=Object.assign({},_lp);
 defaultHalf();
 // 페이지를 켜둔 채 오후 1시가 지나면 오늘 지도를 오후로 자동 전환
 let autoPM=new Date().getHours()>=13;
