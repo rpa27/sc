@@ -94,6 +94,7 @@ header.top .hsub{color:var(--mute);font-size:13px}
 .rb .l1 b{font-weight:800}
 .tag{font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--soft);color:var(--mute)}
 .tag.new{background:var(--accentbg);color:var(--accent)}
+.rb .l3{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:12.5px;color:var(--faint);white-space:pre-line;margin-top:2px}
 .rb .l2{font-size:12.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .go{font-size:12.5px;font-weight:700;color:var(--accent);white-space:nowrap}
 .go.no{color:var(--faint)}
@@ -391,7 +392,7 @@ function renderDay(){
   $('#dpTitle').textContent=dayLabel(sel);
   $('#dpCount').textContent='입력 '+n+' / '+MEMBERS.length;
   $('#dpList').innerHTML=MEMBERS.map(m=>{const e=day[m.id];
-    return `<button class="row" style="--mc:var(${m.c})" data-m="${m.id}"><span class="av">${m.name[0]}</span><span class="rb"><span class="l1"><b>${m.name}</b>${e?`<span class="tag ${e.type==='신규'?'new':''}">${e.type}거래처</span><span class="tag">${hmS(e.in)} ~ ${hmS(e.out)}</span>`:''}</span><span class="l2">${e?esc(placeHalf(e)):'아직 입력하지 않았어요'}</span></span><span class="go ${e?'':'no'}">${e?'보기':'입력'} ›</span></button>`}).join('');
+    return `<button class="row" style="--mc:var(${m.c})" data-m="${m.id}"><span class="av">${m.name[0]}</span><span class="rb"><span class="l1"><b>${m.name}</b>${e?`<span class="tag ${e.type==='신규'?'new':''}">${e.type}거래처</span><span class="tag">${hmS(e.in)} ~ ${hmS(e.out)}</span>`:''}</span><span class="l2">${e?esc(placeHalf(e)):'아직 입력하지 않았어요'}</span>${e&&unlocked&&e.memo?`<span class="l3">${esc(e.memo)}</span>`:''}</span><span class="go ${e?'':'no'}">${e?'보기':'입력'} ›</span></button>`}).join('');
 }
 function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 
