@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1f5fc8">
+<title>출품영업팀 스케줄</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<style>
+:root{
+  --bg:#f3f5f8;--card:#ffffff;--fg:#18202e;--mute:#667085;--faint:#98a2b3;--line:#e3e7ee;--soft:#eef1f6;
+  --accent:#1f5fc8;--accentbg:#e8f0fd;--accentfg:#ffffff;--danger:#c0392b;
+  --land:#e6ebf2;--landline:#ffffff;--sea:#f7f9fc;--shadow:0 1px 2px rgba(16,24,40,.06),0 4px 16px rgba(16,24,40,.06);
+  --c0:#475467;--c1:#2f6fe4;--c2:#e4572e;--c3:#139c8e;--c4:#8b5cf6;--c5:#e09400;--c6:#d6336c;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f141c;--card:#181f2a;--fg:#e8ecf2;--mute:#9aa5b8;--faint:#6b778a;--line:#2a3342;--soft:#202938;
+  --accent:#6ea0ff;--accentbg:#1c2b48;--accentfg:#0f141c;--danger:#ff7b6b;
+  --land:#253043;--landline:#0f141c;--sea:#131a24;--shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+  --c0:#c3ccda;--c1:#6ea0ff;--c2:#ff8462;--c3:#3fd0bf;--c4:#b49bff;--c5:#ffc04d;--c6:#ff6fa0;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f141c;--card:#181f2a;--fg:#e8ecf2;--mute:#9aa5b8;--faint:#6b778a;--line:#2a3342;--soft:#202938;
+  --accent:#6ea0ff;--accentbg:#1c2b48;--accentfg:#0f141c;--danger:#ff7b6b;
+  --land:#253043;--landline:#0f141c;--sea:#131a24;--shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+  --c0:#c3ccda;--c1:#6ea0ff;--c2:#ff8462;--c3:#3fd0bf;--c4:#b49bff;--c5:#ffc04d;--c6:#ff6fa0;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:"Noto Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:14px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+.wrap{max-width:1240px;margin:0 auto;padding-block:16px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+header.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+header.top h1{font-size:20px;font-weight:800;margin:0;letter-spacing:-.01em}
+header.top .hsub{color:var(--mute);font-size:13px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:13px;font-weight:600}
+.sync{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--mute)}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--faint)}
+.sync.ok i{background:#22a06b}.sync.warn i{background:#e09400}.sync.err i{background:var(--danger)}
+
+/* org chart */
+.org{padding:16px;display:flex;flex-direction:column;align-items:center}
+.lead{background:var(--fg);color:var(--bg);border-radius:12px;padding:9px 26px;font-weight:800;text-align:center;font-size:15px;transition:transform .12s}
+.lead:active{transform:scale(.97)}
+.lead small{display:block;font-weight:500;font-size:12px;opacity:.75}
+.lead .st{display:block;margin-top:3px;font-size:11.5px;font-weight:700;opacity:.95}
+.lead .st.no{opacity:.55;font-weight:500}
+.stem{width:2px;height:14px;background:var(--line)}
+.members{position:relative;width:100%;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;padding-top:14px}
+.members:before{content:"";position:absolute;top:0;left:8.33%;right:8.33%;height:2px;background:var(--line)}
+.mem{position:relative;border:1.5px solid var(--line);border-radius:12px;padding:10px 6px 9px;text-align:center;background:var(--card);transition:transform .12s,border-color .12s}
+.mem:before{content:"";position:absolute;top:-15px;left:50%;width:2px;height:14px;background:var(--line)}
+.mem:active{transform:scale(.97)}
+.mem .nm{font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;gap:6px}
+.mem .nm i{width:9px;height:9px;border-radius:50%;background:var(--mc)}
+.mem .rk{font-size:12px;color:var(--mute)}
+.mem .st{margin-top:5px;font-size:11.5px;font-weight:600;color:var(--mc);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mem .st.no{color:var(--faint);font-weight:500}
+.mem.done{border-color:var(--mc)}
+
+/* main */
+.main{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:16px;align-items:start}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.cal{padding:14px}
+.calhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.calhead .ttl{font-size:18px;font-weight:800;padding:6px 10px;border-radius:10px}
+.calhead .ttl:hover{background:var(--soft)}
+.nav{display:flex;gap:6px}
+.icon{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:var(--soft);font-size:18px;font-weight:700}
+.todayb{padding:0 12px;width:auto;font-size:13px}
+.wk,.days{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.wk div{text-align:center;font-size:12px;font-weight:700;color:var(--mute);padding:4px 0}
+.day{min-height:64px;border-radius:12px;border:1.5px solid transparent;background:var(--soft);padding:7px 7px 6px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;transition:background .12s,border-color .12s}
+.day .n{font-weight:700;font-size:14px}
+.day.out{opacity:.35}
+.day.today .n{color:var(--accent)}
+.day.today{border-color:var(--accent)}
+.day.sel{background:var(--accent);border-color:var(--accent)}
+.day.sel .n,.day.sel .cnt{color:var(--accentfg)}
+.dots{display:flex;flex-wrap:wrap;gap:3px}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--mc)}
+.day.sel .dots i{box-shadow:0 0 0 1.5px var(--accentfg)}
+.cnt{font-size:10.5px;color:var(--mute);font-weight:600}
+.mp{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.mp button{padding:14px 0;border-radius:12px;background:var(--soft);font-weight:700}
+.mp button.on{background:var(--accent);color:var(--accentfg)}
+
+.daypanel{padding:14px}
+.dph{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.dph b{font-size:16px;font-weight:800}
+.dph span{font-size:13px;color:var(--mute)}
+.row{display:flex;align-items:center;gap:10px;padding:11px 8px;border-radius:12px;width:100%;text-align:left}
+.row+.row{border-top:1px solid var(--line);border-radius:0}
+.row:hover{background:var(--soft)}
+.av{flex:0 0 36px;height:36px;border-radius:50%;background:var(--mc);color:#fff;display:grid;place-items:center;font-weight:800;font-size:14px}
+.rb{flex:1;min-width:0}
+.rb .l1{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rb .l1 b{font-weight:800}
+.tag{font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--soft);color:var(--mute)}
+.tag.new{background:var(--accentbg);color:var(--accent)}
+.rb .l2{font-size:12.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.go{font-size:12.5px;font-weight:700;color:var(--accent);white-space:nowrap}
+.go.no{color:var(--faint)}
+
+/* map */
+.mapcard{padding:14px;position:sticky;top:12px}
+.maphead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.maphead b{font-size:16px;font-weight:800}
+.seg{display:inline-flex;background:var(--soft);border-radius:10px;padding:3px}
+.seg button{padding:6px 12px;border-radius:8px;font-size:13px;font-weight:700;color:var(--mute)}
+.seg button.on{background:var(--card);color:var(--fg);box-shadow:var(--shadow)}
+.mapbox{background:var(--sea);border-radius:12px;overflow:hidden}
+#map{display:block;width:100%;height:auto;max-height:76vh}
+#map path{fill:var(--land);stroke:var(--landline);stroke-width:1.2;vector-effect:non-scaling-stroke}
+.pulse{transform-box:fill-box;transform-origin:center;animation:pulse 1.8s ease-out infinite}
+@keyframes pulse{0%{transform:scale(.4);opacity:.75}100%{transform:scale(2.4);opacity:0}}
+@media (prefers-reduced-motion:reduce){.pulse{animation:none;opacity:.25}}
+.mk text{font-family:inherit;font-weight:800;paint-order:stroke;stroke:var(--card);stroke-linejoin:round}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:10px;font-size:12.5px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:9px;height:9px;border-radius:50%;background:var(--mc)}
+.empty{color:var(--faint);font-size:13px;text-align:center;padding:6px 0 2px}
+
+/* sheet */
+.scrim{position:fixed;inset:0;background:rgba(10,14,22,.45);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--card);border-radius:20px 20px 0 0;max-height:92vh;display:flex;flex-direction:column;transform:translateY(105%);transition:transform .26s cubic-bezier(.2,.8,.2,1);box-shadow:0 -8px 30px rgba(0,0,0,.18)}
+.sheet{visibility:hidden;transition:transform .26s cubic-bezier(.2,.8,.2,1),visibility 0s .26s}
+.sheet.on{transform:none;visibility:visible;transition:transform .26s cubic-bezier(.2,.8,.2,1)}
+@media (min-width:760px){.sheet{left:50%;right:auto;bottom:auto;top:50%;width:540px;border-radius:20px;transform:translate(-50%,-46%) scale(.98);opacity:0;pointer-events:none;transition:transform .2s,opacity .2s;max-height:88vh}.sheet.on{transform:translate(-50%,-50%);opacity:1;pointer-events:auto;transition:transform .2s,opacity .2s}}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:8px auto 0}
+@media (min-width:760px){.grab{display:none}}
+.sh{display:flex;align-items:center;gap:10px;padding:12px max(18px,env(safe-area-inset-right,0px)) 10px max(18px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line)}
+.sh .tt{flex:1;min-width:0}
+.sh .tt b{font-size:17px;font-weight:800;display:block}
+.sh .tt span{font-size:12.5px;color:var(--mute)}
+.sb{overflow-y:auto;padding:16px max(18px,env(safe-area-inset-right,0px)) 8px max(18px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:18px;overscroll-behavior:contain}
+.fl{font-size:13px;font-weight:800;margin-bottom:8px;display:flex;justify-content:space-between}
+.fl em{font-style:normal;font-weight:500;color:var(--faint)}
+.times{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tbox{border:1.5px solid var(--line);border-radius:14px;padding:10px;text-align:center}
+.tbox .lb{font-size:12px;color:var(--mute);font-weight:700}
+.tbox .tv{font-size:22px;font-weight:800;margin:2px 0 8px;font-variant-numeric:tabular-nums}
+.tbox .tv small{font-size:13px;font-weight:700;color:var(--mute);margin-right:4px}
+.stp{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.stp button{height:40px;border-radius:10px;background:var(--soft);font-weight:800;font-size:13px}
+.stp button:active{background:var(--accentbg)}
+.chips{display:grid;gap:8px}
+.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:repeat(3,1fr)}
+.chip{min-height:48px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);font-weight:700;font-size:14.5px;padding:8px 6px;transition:all .12s}
+.chip.big{min-height:60px;font-size:16px}
+.chip.big small{display:block;font-size:11.5px;font-weight:500;color:var(--mute)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--accentfg)}
+.chip.on small{color:var(--accentfg);opacity:.85}
+.sub{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:14px;background:var(--soft);animation:drop .18s ease-out}
+.sub .chip{background:var(--card)}
+.sub .chip.on{background:var(--accent)}
+@keyframes drop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.sw{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;font-weight:700;text-align:left}
+.sw .tg{flex:0 0 46px;height:28px;border-radius:999px;background:var(--line);position:relative;transition:background .15s}
+.sw .tg:after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
+.sw.on .tg{background:var(--accent)}.sw.on .tg:after{transform:translateX(18px)}
+.pblock{display:flex;flex-direction:column;gap:8px}
+.hb{display:inline-block;font-size:11.5px;font-weight:800;padding:1px 8px;border-radius:6px;background:var(--accentbg);color:var(--accent);margin-right:6px}
+.mm{transition:transform .9s cubic-bezier(.45,0,.2,1)}
+.trail{fill:none;stroke-dasharray:4 4;opacity:.55}
+.notice{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;background:var(--accentbg);color:var(--accent);font-size:13px;font-weight:700}
+.notice.ro{background:var(--soft);color:var(--mute)}
+.sb.ro .chips,.sb.ro .stp,.sb.ro .sw{pointer-events:none}
+.sb.ro .chip:not(.on),.sb.ro .stp,.sb.ro .sw{opacity:.45}
+.sfnote{flex:1;text-align:center;font-size:13.5px;font-weight:700;color:var(--mute);padding:14px 0}
+.pin{width:100%;height:48px;border:1.5px solid var(--line);border-radius:12px;padding:0 14px;font:inherit;font-size:17px;letter-spacing:.2em;background:var(--card);color:var(--fg)}
+.pin:focus{outline:none;border-color:var(--accent)}
+.pin::placeholder{letter-spacing:0;color:var(--faint);font-size:15px}
+#pinOpen:empty{display:none}
+.pinhint{font-size:12px;color:var(--faint);margin-top:6px}
+.crumb{font-size:12.5px;color:var(--accent);font-weight:700}
+textarea{width:100%;min-height:110px;resize:vertical;border:1.5px solid var(--line);border-radius:14px;padding:12px;font:inherit;font-size:15px;line-height:1.55;background:var(--card);color:var(--fg)}
+textarea::placeholder{color:var(--faint)}
+textarea:focus{outline:none;border-color:var(--accent)}
+.ctr{text-align:right;font-size:12px;color:var(--faint);margin-top:4px}
+.sf{padding:12px max(18px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px));border-top:1px solid var(--line);display:flex;gap:8px;align-items:center}
+.save{flex:1;height:52px;border-radius:14px;background:var(--accent);color:var(--accentfg);font-weight:800;font-size:16px}
+.save:disabled{opacity:.4;cursor:not-allowed}
+.del{height:52px;padding:0 16px;border-radius:14px;background:var(--soft);color:var(--danger);font-weight:700}
+.hint{font-size:12px;color:var(--faint);text-align:center;margin-top:-4px}
+.lockb{font-size:12.5px;font-weight:700;padding:5px 10px;border-radius:999px;background:var(--soft);color:var(--mute)}
+.lockb.on{background:var(--accentbg);color:var(--accent)}
+.unl{display:flex;gap:8px;margin:4px 0 10px;animation:drop .18s ease-out}
+.unl input{flex:1;min-width:0;height:44px;border:1.5px solid var(--line);border-radius:12px;padding:0 12px;font:inherit;font-size:16px;background:var(--card);color:var(--fg)}
+.unl input:focus{outline:none;border-color:var(--accent)}
+.unl button{height:44px;padding:0 16px;border-radius:12px;background:var(--accent);color:var(--accentfg);font-weight:800}
+.unl .err{border-color:var(--danger)}
+.lockmsg{font-size:12.5px;color:var(--mute);margin-bottom:6px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.lockmsg button{color:var(--accent);font-weight:700;font-size:12.5px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:700;font-size:13.5px;opacity:0;transition:all .2s;z-index:60;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:900px){.main{grid-template-columns:minmax(0,1fr)}.mapcard{position:static}}
+@media (max-width:640px){
+  .members{grid-template-columns:repeat(3,minmax(0,1fr));padding-top:0}
+  .members:before,.mem:before{display:none}
+  .stem{height:10px;background:transparent}
+  .day{min-height:56px;padding:6px 5px}
+  .dots i{width:6px;height:6px}
+  header.top h1{font-size:18px}
+}
+</style>
+</head><body>
+
+
+<div class="wrap">
+  <header class="top">
+    <div><h1>출품영업팀 스케줄</h1><div class="hsub">월~금 데일리 · 날짜를 누르면 그날 일정과 위치가 보여요</div></div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="pill" id="todayPill"></span><span class="sync" id="sync"><i></i><span>연결 확인 중</span></span></div>
+  </header>
+
+  <section class="card org">
+    <button class="lead" id="leadCard" data-m="hw"></button>
+    <div class="stem"></div>
+    <div class="members" id="members"></div>
+  </section>
+
+  <div class="main">
+    <div class="col">
+      <section class="card cal">
+        <div class="calhead">
+          <button class="ttl" id="calTitle" aria-label="월 선택"></button>
+          <div class="nav">
+            <button class="icon todayb" id="goToday">오늘</button>
+            <button class="icon" id="prev" aria-label="이전 달">‹</button>
+            <button class="icon" id="next" aria-label="다음 달">›</button>
+          </div>
+        </div>
+        <div id="calBody"></div>
+      </section>
+      <section class="card daypanel">
+        <div class="dph"><b id="dpTitle"></b><span style="display:flex;gap:8px;align-items:center"><span id="dpCount"></span><button class="lockb" id="lockBtn"></button></span></div>
+        <div id="dpUnlock"></div>
+        <div id="dpList"></div>
+      </section>
+    </div>
+
+    <section class="card mapcard">
+      <div class="maphead">
+        <b id="mapTitle">위치 현황</b>
+        <div style="display:flex;gap:6px;flex-wrap:wrap"><div class="seg" id="halfSeg"><button data-h="am" class="on">오전</button><button data-h="pm">오후</button></div><div class="seg" id="zoomSeg"><button data-z="kr" class="on">전국</button><button data-z="cap">수도권</button></div></div>
+      </div>
+      <div class="mapbox"><svg id="map" role="img" aria-label="팀원 위치 지도"></svg></div>
+      <div class="legend" id="legend"></div>
+    </section>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shName">
+  <div class="grab"></div>
+  <div class="sh">
+    <div class="av" id="shAv"></div>
+    <div class="tt"><b id="shName"></b><span id="shDate"></span></div>
+    <button class="icon" id="shClose" aria-label="닫기">✕</button>
+  </div>
+  <div class="sb" id="shBody">
+    <div class="notice" id="shNotice" hidden></div>
+    <div id="pinOpen"></div>
+    <div>
+      <div class="fl">근무 시간 <em>15분 단위</em></div>
+      <div class="times">
+        <div class="tbox"><div class="lb">출근</div><div class="tv" id="tvIn"></div><div class="stp"><button data-t="in" data-d="-15">− 15분</button><button data-t="in" data-d="15">+ 15분</button></div></div>
+        <div class="tbox"><div class="lb">퇴근</div><div class="tv" id="tvOut"></div><div class="stp"><button data-t="out" data-d="-15">− 15분</button><button data-t="out" data-d="15">+ 15분</button></div></div>
+      </div>
+    </div>
+    <div>
+      <div class="fl">영업구분</div>
+      <div class="chips c2" id="fType"></div>
+    </div>
+    <div>
+      <div id="fPlaces" style="display:flex;flex-direction:column;gap:14px"></div>
+    </div>
+    <div>
+      <div class="fl">내용 <em>200자 이내</em></div>
+      <div id="memoLock"></div>
+      <textarea id="fMemo" maxlength="200" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" placeholder="오전, 오후로 나눠서 어디 매매단지에 누구를 만나고 내용 아주 간략히 기재"></textarea>
+      <div class="ctr"><span id="ctr">0</span> / 200</div>
+    </div>
+    <div id="pinSet">
+      <div class="fl">비밀번호 <em>내 일정 열기·수정용</em></div>
+      <input id="fPin" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="숫자 2자리 이상" autocomplete="new-password">
+      <div class="pinhint">숫자 2자리 이상만 가능해요 · 수정할 때 이 비밀번호를 넣어야 해요</div>
+    </div>
+  </div>
+  <div class="sf">
+    <button class="del" id="shDel" hidden>삭제</button>
+    <button class="save" id="shSave">저장</button>
+    <div class="sfnote" id="shNote" hidden></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const GEO={"w": 600, "h": 875.8, "p": [["제주특별자치도", "M227.6,802.6L230.0,804.2L233.6,803.7L234.0,805.9L237.4,808.9L239.2,808.2L243.1,809.0L244.8,812.9L243.4,815.2L244.4,817.4L247.4,817.3L247.9,819.1L246.2,820.7L243.9,828.0L243.7,830.3L241.7,831.0L239.4,833.4L238.8,836.4L235.8,839.5L236.3,840.7L234.6,843.4L231.1,844.5L227.3,843.7L223.1,848.2L221.4,848.1L216.3,849.6L212.1,849.3L209.8,850.2L207.0,854.0L204.3,854.9L202.7,853.6L197.9,854.6L194.4,854.1L192.9,855.8L190.3,855.8L188.0,857.0L185.4,854.2L183.0,855.5L180.6,853.6L177.0,855.5L168.7,854.5L165.9,856.9L165.3,859.5L162.6,861.5L159.7,858.5L157.6,855.1L153.4,853.3L151.2,851.2L148.2,845.9L149.1,844.9L148.5,841.0L149.3,837.4L152.1,834.5L155.1,832.7L156.3,830.3L158.1,829.6L161.1,826.3L161.1,823.5L166.9,820.8L167.2,818.5L170.7,818.4L177.1,814.8L178.3,815.6L189.2,811.6L190.9,809.7L193.6,810.5L196.8,808.3L198.0,809.9L202.2,808.9L204.2,807.2L208.7,807.1L210.1,804.2L211.9,804.9L219.5,804.3L220.6,803.5L224.4,803.9L227.6,802.6Z"], ["경상남도", "M387.5,589.1L388.0,592.5L391.8,596.9L391.0,600.7L391.4,603.2L386.4,600.7L386.2,601.8L381.6,602.3L379.2,601.1L378.3,597.0L380.5,595.4L382.7,590.7L384.2,589.1L387.5,589.1ZM369.9,584.9L372.8,586.0L374.4,589.9L373.4,592.3L370.3,596.6L373.6,603.2L375.9,603.8L377.4,607.2L382.0,602.8L387.4,603.2L391.0,604.6L391.1,608.1L389.8,608.8L390.5,616.6L386.6,620.8L385.0,620.0L381.4,622.1L377.7,622.3L376.3,618.6L376.8,611.6L374.2,611.8L371.0,613.4L372.1,618.1L368.8,620.3L366.3,619.7L364.8,616.9L362.3,615.8L364.4,612.9L362.2,607.6L359.3,602.5L358.6,599.0L361.1,596.3L361.6,592.7L364.2,591.8L364.7,588.2L366.7,585.5L369.9,584.9ZM470.1,570.1L471.9,571.6L474.2,571.3L475.4,573.6L472.9,575.5L472.0,579.7L476.1,584.8L475.1,586.5L475.7,589.9L474.8,592.2L472.1,593.9L474.5,596.2L477.1,593.6L478.2,597.3L472.8,601.6L477.8,609.2L473.8,608.9L473.8,606.1L471.5,606.8L469.2,605.9L468.4,609.1L469.3,610.3L464.7,613.8L466.6,617.0L468.6,616.6L470.5,617.8L462.8,618.7L464.1,620.8L461.2,623.6L457.3,621.2L460.3,619.6L460.6,618.2L456.9,617.3L455.3,613.4L452.6,612.0L452.0,609.9L457.2,608.9L457.9,607.7L458.1,603.0L457.0,599.5L452.8,602.6L449.2,606.7L447.3,602.8L444.8,601.6L443.5,595.9L446.6,591.4L449.1,590.7L450.6,588.5L453.2,590.9L457.7,590.0L459.6,592.1L461.4,592.0L459.5,586.5L458.0,584.9L462.4,582.4L465.8,582.3L466.2,579.7L462.6,578.6L463.8,575.0L465.9,573.5L466.6,578.4L468.5,575.4L470.1,570.1ZM430.6,480.0L432.0,480.7L438.4,478.2L440.3,475.7L445.2,476.2L447.7,475.6L448.3,470.0L450.5,468.8L451.9,473.6L451.8,478.0L454.5,479.4L457.9,483.9L460.7,484.8L467.3,482.1L471.5,482.6L473.0,485.1L475.8,484.8L480.4,486.8L483.7,487.1L485.5,483.6L489.7,482.2L492.2,482.3L494.6,478.5L499.7,475.8L502.9,476.3L508.6,480.6L511.4,478.6L513.6,479.4L514.2,481.6L513.5,484.2L510.3,486.7L507.2,488.0L510.2,493.0L513.9,493.6L524.5,498.4L524.9,500.7L528.8,505.6L531.5,507.8L533.6,508.2L536.0,507.1L539.0,511.9L536.8,515.2L535.6,519.5L533.2,521.0L529.9,519.0L527.2,522.0L525.2,527.7L522.3,528.6L520.3,530.7L518.6,529.8L517.3,532.3L512.5,533.3L510.6,539.5L501.2,542.3L496.1,542.7L494.4,544.6L495.8,547.7L493.8,550.1L490.9,551.5L484.6,551.5L485.7,554.0L489.5,556.0L490.8,559.6L488.3,560.8L485.6,562.3L482.7,560.3L476.9,562.0L473.0,559.9L471.2,552.8L467.9,555.9L464.3,552.9L461.6,553.6L459.1,549.3L458.1,543.4L455.4,547.3L460.0,555.4L460.3,560.0L462.8,562.2L464.5,565.8L460.4,567.7L457.0,568.3L454.8,565.5L454.9,563.3L451.5,558.7L449.5,561.2L445.6,559.6L443.0,561.0L442.2,565.2L439.5,565.1L437.8,567.8L435.8,566.7L431.8,568.8L432.9,570.9L440.1,568.3L440.4,565.4L444.9,566.3L443.5,570.0L447.5,574.2L444.4,577.6L442.4,578.4L439.3,577.4L439.5,582.4L438.3,583.3L438.7,587.2L437.0,593.1L438.4,595.8L440.8,589.8L443.1,594.2L441.5,595.9L441.0,600.7L437.3,602.8L439.6,603.8L439.7,607.6L438.9,611.2L437.6,613.4L435.2,613.9L433.0,609.6L431.4,608.7L431.6,605.6L426.6,603.5L429.0,601.7L431.3,603.9L431.4,599.9L433.6,598.0L431.1,595.2L429.7,597.0L424.4,594.7L421.4,591.8L422.6,590.9L428.7,590.8L427.5,587.1L425.9,585.2L421.6,586.6L421.6,590.3L419.4,591.5L417.2,590.2L417.7,586.9L414.0,585.3L408.3,586.4L409.3,588.5L408.4,590.2L409.1,593.1L405.8,593.0L398.8,591.5L393.0,588.5L390.3,587.7L387.0,583.3L389.8,579.9L388.2,576.3L389.6,573.9L386.6,571.2L384.3,572.7L385.5,575.2L385.2,577.7L381.9,578.1L381.0,579.9L378.3,578.3L376.6,580.1L374.5,577.6L374.0,574.4L370.9,581.1L371.0,583.0L367.3,584.8L362.4,584.4L355.8,585.9L353.3,580.7L354.9,578.3L356.1,573.7L354.1,571.8L353.7,568.5L350.1,566.7L349.7,564.1L347.4,563.6L344.3,560.2L344.3,556.0L334.9,546.8L334.5,539.0L333.5,535.1L331.7,534.1L329.3,527.7L331.2,527.3L334.8,524.0L335.1,522.2L333.5,518.7L337.3,512.5L340.1,510.7L340.8,505.7L337.9,505.4L336.7,503.5L336.9,500.9L338.9,499.8L335.5,493.7L335.3,492.2L331.0,489.0L330.6,487.3L333.5,484.1L333.8,480.7L335.8,478.9L334.8,475.1L335.8,471.9L337.2,470.7L337.9,466.2L340.0,464.4L340.0,456.7L345.0,451.9L347.5,450.6L350.8,443.4L354.2,444.0L356.2,442.0L358.8,441.7L361.7,439.2L362.9,439.6L364.3,436.1L368.9,432.1L368.6,435.5L369.6,436.5L372.5,435.7L374.4,437.9L374.6,441.4L377.0,440.5L379.6,442.1L381.4,441.1L382.9,444.2L384.8,445.6L387.3,444.6L389.7,445.6L392.2,443.8L399.1,446.7L398.8,449.6L399.7,451.9L402.7,452.4L404.2,456.1L407.2,457.4L409.0,462.4L409.1,468.4L406.2,470.1L404.2,470.2L404.2,473.3L406.9,472.6L408.9,474.8L413.4,475.3L414.4,473.0L416.6,475.0L418.8,473.6L422.3,473.1L428.6,475.1L430.6,480.0Z"], ["경상북도", "M568.4,473.7L563.6,471.7L556.1,469.2L549.6,474.1L544.2,473.2L543.4,471.3L544.5,467.3L543.4,465.7L540.8,465.4L537.4,462.6L531.4,463.6L529.5,462.1L528.2,464.1L522.3,465.6L519.8,469.0L519.6,472.4L520.4,475.4L517.0,473.8L511.4,478.6L508.6,480.6L502.9,476.3L499.7,475.8L494.6,478.5L492.2,482.3L489.7,482.2L485.5,483.6L483.7,487.1L480.4,486.8L475.8,484.8L473.0,485.1L471.5,482.6L467.3,482.1L460.7,484.8L457.9,483.9L454.5,479.4L451.8,478.0L451.9,473.6L450.5,468.8L452.7,463.0L457.3,459.8L462.0,460.1L461.2,462.0L462.8,465.4L464.7,465.1L468.0,462.8L470.5,462.5L471.6,460.9L472.1,456.8L470.4,451.8L474.7,449.3L473.7,446.0L479.2,441.2L480.7,437.0L479.9,432.1L477.5,429.9L478.4,427.5L477.5,425.5L478.5,423.2L476.6,421.0L475.9,417.9L471.5,416.3L462.1,417.6L458.6,422.0L454.3,423.3L450.5,422.4L451.5,428.2L450.1,431.6L446.2,435.0L443.9,435.2L442.9,433.4L444.0,428.7L439.6,428.9L436.6,431.1L434.8,436.1L432.5,439.9L433.1,442.2L437.2,442.1L442.0,443.7L444.2,445.9L443.2,448.9L436.9,448.7L435.3,450.7L432.6,456.0L433.4,458.8L438.5,462.0L438.6,465.5L436.6,467.1L429.2,464.8L428.1,465.5L428.6,469.0L432.0,473.0L434.7,475.1L432.5,479.8L430.6,480.0L428.6,475.1L422.3,473.1L418.8,473.6L416.6,475.0L414.4,473.0L413.4,475.3L408.9,474.8L406.9,472.6L404.2,473.3L404.2,470.2L406.2,470.1L409.1,468.4L409.0,462.4L407.2,457.4L404.2,456.1L402.7,452.4L399.7,451.9L398.8,449.6L399.1,446.7L392.2,443.8L389.7,445.6L387.3,444.6L384.8,445.6L382.9,444.2L381.4,441.1L379.6,442.1L377.0,440.5L374.6,441.4L374.4,437.9L372.5,435.7L369.6,436.5L368.6,435.5L368.9,432.1L368.2,430.0L371.6,427.9L369.8,421.0L367.4,419.1L367.5,415.1L370.9,412.5L372.6,410.1L375.1,410.6L378.3,407.8L377.9,403.7L379.0,400.0L381.6,398.3L382.7,394.5L380.1,388.9L381.5,387.0L385.0,385.6L388.2,388.0L390.0,386.9L389.7,384.7L387.1,380.7L389.2,378.1L384.6,375.7L381.0,376.9L379.1,379.1L376.8,378.1L374.4,374.7L369.5,372.5L367.9,375.2L364.3,375.1L363.0,369.8L364.4,366.5L368.1,364.2L369.3,362.2L367.1,354.6L368.3,352.1L367.1,349.6L368.2,345.9L368.0,342.8L371.3,338.5L370.6,335.8L367.1,333.7L367.1,331.0L365.6,328.9L360.8,328.5L357.4,325.3L360.8,322.0L364.1,321.9L363.9,318.7L365.7,318.4L367.2,315.2L369.1,319.3L374.5,321.1L375.4,315.9L374.6,313.7L368.9,309.5L374.5,309.2L374.5,307.2L376.7,305.3L378.3,302.3L381.6,305.4L383.6,305.5L386.1,304.1L389.4,306.8L392.4,307.0L392.1,304.7L387.4,300.7L390.3,293.5L390.8,289.8L394.0,291.7L396.9,291.5L397.6,289.4L401.1,287.0L404.3,289.2L411.1,290.0L410.5,284.7L413.1,284.9L414.1,280.9L419.4,283.4L421.1,286.9L424.3,290.0L425.9,289.7L430.1,292.3L432.0,290.2L437.0,290.6L440.6,284.7L440.5,282.2L437.4,280.3L439.5,276.3L439.7,272.2L442.0,271.2L442.4,269.1L448.8,264.5L449.0,262.9L452.8,262.0L456.2,258.3L455.4,255.8L457.8,253.9L463.8,254.7L466.5,250.5L471.2,252.4L472.7,254.3L477.1,254.5L479.3,256.3L480.5,255.3L479.3,251.7L480.9,250.7L483.5,247.0L486.5,248.6L488.8,248.5L491.3,252.6L495.1,253.7L497.7,253.7L501.0,246.3L503.9,245.8L505.9,248.6L508.8,247.5L519.2,250.1L520.7,246.1L523.2,245.0L528.9,247.9L535.8,254.4L540.6,253.8L539.7,249.2L542.8,245.7L544.9,244.7L545.7,242.4L548.5,242.8L549.7,240.6L554.3,237.9L557.4,237.7L559.6,241.9L559.4,245.0L562.6,248.6L565.5,250.7L563.9,252.5L563.3,257.0L564.4,259.8L563.1,264.0L564.5,268.5L564.7,277.1L564.0,278.4L565.8,284.8L569.4,290.0L570.1,294.2L572.1,297.4L570.7,299.0L571.9,303.0L571.3,304.4L571.7,308.4L570.3,310.4L566.8,312.9L563.6,320.4L563.3,324.8L564.9,328.8L567.2,331.5L568.0,339.2L566.4,342.4L566.8,345.6L566.6,350.9L565.2,354.6L561.5,360.9L559.4,366.1L559.8,367.7L558.8,373.1L559.6,375.3L558.6,378.4L560.1,380.7L560.0,385.1L558.5,385.9L559.1,388.7L561.1,390.3L562.0,392.7L561.7,397.3L567.2,402.8L564.4,404.7L564.6,406.5L559.6,409.1L559.0,410.7L560.0,413.9L564.2,416.7L565.8,419.1L568.6,419.9L571.4,416.6L575.1,414.6L575.3,412.8L579.0,409.5L580.8,405.2L583.6,406.5L585.4,415.5L584.8,417.4L582.0,420.1L581.7,423.7L579.1,428.7L577.2,430.1L578.3,433.6L577.3,438.7L578.3,440.2L576.0,446.5L576.6,447.7L573.7,452.3L574.4,454.7L573.0,461.4L571.3,465.4L571.7,468.2L568.4,473.7ZM754.3,174.2L754.6,177.4L755.9,179.7L755.2,184.7L748.8,188.2L744.7,187.3L740.8,184.4L741.2,181.4L739.6,179.8L746.6,176.3L752.5,175.4L754.3,174.2Z"], ["전라남도", "M215.3,670.7L217.5,671.4L221.4,674.9L221.0,677.1L223.5,683.5L226.3,684.9L224.9,688.1L221.4,689.0L219.5,687.4L216.5,688.1L214.4,684.6L210.8,681.6L209.5,674.0L210.6,672.3L215.3,670.7ZM234.5,664.5L235.9,666.6L238.5,672.7L234.7,673.7L228.9,674.2L226.6,678.4L225.6,677.5L226.8,674.0L224.3,673.3L225.4,670.2L228.6,665.9L230.2,666.1L234.5,664.5ZM284.1,656.5L285.6,659.3L282.8,666.0L279.7,666.3L277.0,665.6L274.1,666.5L271.5,666.2L268.1,660.7L271.5,657.0L273.0,659.5L275.6,658.7L279.6,656.2L281.0,657.2L284.1,656.5ZM159.9,641.3L166.7,644.1L167.1,647.1L171.0,648.1L176.7,654.6L175.4,660.7L173.6,662.3L174.6,664.4L171.0,668.7L168.1,670.3L165.3,669.7L164.3,672.0L161.8,671.5L161.4,674.5L159.0,674.5L153.6,677.7L150.1,678.6L145.1,677.5L145.1,675.2L142.5,674.1L141.8,671.9L139.3,668.2L140.9,664.6L146.4,659.2L149.9,657.8L150.7,655.1L153.2,654.1L156.7,649.8L160.5,649.5L161.2,647.7L158.7,644.4L159.9,641.3ZM351.2,618.5L355.9,621.1L356.6,623.5L354.7,626.7L357.1,630.0L357.8,634.8L356.7,637.9L358.5,641.1L355.9,641.9L351.3,640.7L346.3,635.9L348.1,633.7L347.9,630.8L351.1,628.5L352.4,625.5L352.3,621.8L351.2,618.5ZM123.9,619.1L124.9,620.4L129.8,622.1L129.0,626.2L126.4,627.2L125.5,629.5L123.6,630.7L117.1,627.4L117.1,622.2L120.5,621.6L122.9,617.9L123.9,619.1ZM138.3,611.3L140.3,612.5L143.7,611.8L145.6,614.6L148.7,614.6L152.6,618.8L153.0,620.7L150.0,623.7L146.5,625.9L143.2,626.5L141.8,624.4L137.4,622.5L136.5,621.1L137.2,616.4L138.1,615.4L136.6,612.4L138.3,611.3ZM127.5,607.3L127.7,614.3L125.0,615.5L120.4,615.5L121.7,618.4L120.6,620.4L117.5,621.5L114.4,619.6L113.7,613.5L116.3,611.7L119.8,611.7L123.7,609.3L124.6,607.5L127.5,607.3ZM165.8,588.8L167.7,590.8L170.8,590.8L171.7,593.1L169.5,593.8L169.3,598.3L173.4,597.9L175.3,600.5L173.6,605.7L170.3,605.1L171.2,601.9L170.6,600.4L163.2,599.2L160.5,601.7L157.0,600.2L158.8,598.7L161.6,598.6L163.9,597.3L166.5,593.2L163.7,590.6L165.8,588.8ZM135.9,586.6L139.6,588.6L141.2,592.1L140.1,596.1L138.8,598.0L134.3,599.6L127.5,597.8L126.5,595.8L129.7,590.1L131.9,590.7L133.0,589.2L135.3,589.0L135.9,586.6ZM145.0,572.1L147.6,572.3L149.9,574.1L151.9,578.6L150.2,585.0L148.1,586.2L143.7,584.2L145.2,581.6L144.9,576.2L142.7,577.1L140.4,576.2L142.6,573.4L145.0,572.1ZM148.6,553.8L146.5,554.8L144.3,558.1L143.4,561.2L143.1,566.8L139.5,568.2L137.2,567.0L134.0,566.8L133.2,563.0L134.1,560.3L138.7,558.8L143.0,553.9L148.6,553.8ZM329.3,527.7L331.7,534.1L333.5,535.1L334.5,539.0L334.9,546.8L344.3,556.0L344.3,560.2L347.4,563.6L349.7,564.1L350.1,566.7L353.7,568.5L354.1,571.8L356.1,573.7L354.9,578.3L353.2,579.9L352.7,581.8L348.6,583.8L345.0,587.3L343.8,589.8L337.3,594.4L334.4,589.7L331.0,589.2L334.0,593.4L330.9,596.2L333.6,600.2L337.7,603.2L340.1,601.0L341.1,602.2L344.8,598.6L349.3,599.4L352.9,597.8L354.5,598.6L353.9,606.0L352.1,610.4L350.7,611.8L351.9,613.8L351.3,618.1L345.5,620.6L342.6,617.4L339.6,615.0L337.2,621.4L335.3,623.6L335.2,625.8L337.3,632.3L334.8,633.3L330.9,631.4L328.4,632.7L326.0,629.7L325.9,625.5L327.9,619.3L329.5,618.6L330.9,614.7L329.6,614.0L326.7,606.9L322.4,606.5L324.3,603.0L322.3,600.1L321.3,595.7L319.7,596.2L315.9,600.9L306.8,604.1L309.2,606.2L306.0,608.6L305.0,611.3L306.8,613.1L306.3,614.8L303.2,617.2L305.5,622.0L313.3,624.6L313.0,628.3L316.6,628.2L316.1,630.9L317.8,631.3L320.2,640.8L317.7,643.0L313.9,642.2L312.3,643.3L308.1,641.1L305.9,642.5L307.6,645.7L310.9,647.1L309.6,650.5L306.8,654.7L304.0,654.9L303.6,657.6L297.7,659.5L298.8,664.0L296.7,664.6L292.3,659.0L289.7,658.2L291.7,655.8L288.4,652.3L282.3,652.1L280.4,650.2L277.2,651.9L272.9,651.6L271.3,650.8L269.9,647.9L270.0,646.0L274.0,642.1L277.5,640.3L277.6,635.3L281.1,632.0L282.1,635.0L284.6,632.7L285.3,627.0L287.6,622.2L291.1,620.7L292.1,624.1L291.3,628.0L295.8,629.3L296.1,626.6L298.2,622.5L296.9,615.6L294.3,616.0L293.0,619.0L290.1,617.4L289.0,618.7L286.0,613.1L282.3,617.9L280.9,622.8L278.6,625.0L273.6,624.7L271.9,623.4L269.3,627.4L264.4,629.7L262.5,632.9L254.9,637.3L256.7,638.7L254.7,640.5L253.4,644.3L254.0,649.0L252.0,648.6L250.3,650.5L252.2,652.7L250.8,655.1L252.6,657.4L249.8,660.1L247.5,663.6L246.1,662.8L239.8,662.2L241.2,666.6L236.5,663.7L232.5,663.5L228.8,660.6L229.0,657.2L228.3,653.3L228.9,650.3L229.1,644.3L226.4,639.1L225.7,645.4L226.0,646.7L224.8,651.2L224.7,656.3L222.5,657.2L223.4,659.8L220.8,664.0L217.0,664.8L214.9,667.0L211.2,667.7L206.8,670.8L207.2,677.7L204.9,679.5L205.0,683.1L202.8,683.8L199.1,683.6L197.5,686.4L194.0,687.2L193.3,683.9L195.2,681.5L194.3,677.3L189.3,677.7L189.3,674.0L191.1,672.8L190.5,670.6L193.9,668.9L192.8,666.9L190.4,665.7L188.7,666.9L186.4,663.3L187.6,661.3L186.1,659.0L188.1,654.2L186.7,650.3L183.1,648.3L182.8,646.6L179.2,648.4L176.4,645.4L174.2,645.8L170.6,643.8L168.0,644.8L167.0,641.1L163.5,640.1L164.3,634.9L162.4,634.3L161.4,630.1L160.5,629.4L160.8,624.7L162.9,621.9L162.9,619.2L164.4,614.5L166.2,614.0L170.7,617.7L172.7,623.3L171.3,624.6L171.6,627.9L175.0,633.3L176.0,636.7L183.4,641.1L182.6,637.4L175.6,632.7L173.7,627.5L171.8,626.0L174.9,624.0L177.5,618.9L174.7,617.8L176.5,615.5L176.3,613.2L185.3,610.7L184.3,608.1L179.1,610.7L175.0,611.0L174.1,609.3L175.2,605.9L177.5,602.2L179.9,599.8L178.3,597.1L179.2,595.3L177.6,593.8L179.6,590.4L177.9,589.1L177.3,584.8L178.2,582.5L176.3,581.0L174.7,587.8L171.7,589.9L170.0,589.1L168.9,585.3L165.6,581.9L167.0,578.6L170.4,581.0L173.7,578.5L171.9,576.0L177.6,572.5L176.6,569.0L172.8,570.3L171.8,565.3L169.8,562.5L166.3,568.9L165.1,567.1L161.1,568.0L162.9,570.5L160.6,574.4L156.8,572.7L157.9,569.5L156.3,567.3L151.6,567.3L148.5,565.9L149.2,560.1L152.2,558.6L157.6,560.9L159.2,559.1L160.8,554.0L162.6,553.4L169.4,555.3L171.9,552.6L171.9,558.2L170.7,562.0L174.9,565.2L178.6,564.3L179.9,566.4L178.9,571.2L184.3,567.6L185.6,564.9L184.1,563.1L186.6,561.9L184.8,559.7L181.5,559.5L179.4,555.1L174.2,550.1L171.4,546.1L167.1,548.3L165.9,540.6L167.6,536.3L169.3,536.6L169.2,531.0L173.7,530.8L176.1,528.2L176.2,524.5L178.7,518.2L179.7,511.8L181.7,508.8L185.1,508.6L189.0,509.5L190.3,511.5L189.4,515.6L194.3,521.2L194.1,525.0L195.7,527.9L198.3,527.0L203.5,528.3L202.1,525.3L205.0,523.5L207.7,525.7L210.2,525.9L213.0,521.0L217.2,521.3L217.9,518.8L219.8,518.9L221.2,517.1L221.1,514.2L223.9,509.7L223.4,505.4L225.5,502.9L231.8,502.5L233.4,499.7L236.5,502.9L238.8,503.6L243.4,506.8L242.5,508.1L243.9,510.7L246.7,512.4L247.0,514.1L250.9,514.1L252.7,512.8L251.8,509.0L257.2,504.1L260.0,503.0L260.4,507.6L261.8,508.4L260.9,513.5L259.5,514.9L261.5,517.0L262.8,515.8L264.6,518.7L263.9,523.3L262.2,522.8L261.5,526.2L263.5,526.4L270.4,529.2L274.3,526.7L277.1,524.0L281.2,526.6L283.0,526.5L284.0,523.3L288.9,527.3L292.4,526.9L294.6,528.6L301.0,525.8L304.7,528.6L310.7,519.7L315.8,518.6L319.6,519.8L323.3,523.2L329.3,527.7Z"], ["전라북도", "M337.0,407.8L339.1,409.8L339.8,412.4L343.0,408.9L344.5,409.8L345.7,413.4L348.9,413.5L356.2,416.4L357.8,414.4L364.5,412.5L367.5,415.1L367.4,419.1L369.8,421.0L371.6,427.9L368.2,430.0L368.9,432.1L364.3,436.1L362.9,439.6L361.7,439.2L358.8,441.7L356.2,442.0L354.2,444.0L350.8,443.4L347.5,450.6L345.0,451.9L340.0,456.7L340.0,464.4L337.9,466.2L337.2,470.7L335.8,471.9L334.8,475.1L335.8,478.9L333.8,480.7L333.5,484.1L330.6,487.3L331.0,489.0L335.3,492.2L335.5,493.7L338.9,499.8L336.9,500.9L336.7,503.5L337.9,505.4L340.8,505.7L340.1,510.7L337.3,512.5L333.5,518.7L335.1,522.2L334.8,524.0L331.2,527.3L329.3,527.7L323.3,523.2L319.6,519.8L315.8,518.6L310.7,519.7L304.7,528.6L301.0,525.8L294.6,528.6L292.4,526.9L288.9,527.3L284.0,523.3L283.0,526.5L281.2,526.6L277.1,524.0L274.3,526.7L270.4,529.2L263.5,526.4L261.5,526.2L262.2,522.8L263.9,523.3L264.6,518.7L262.8,515.8L261.5,517.0L259.5,514.9L260.9,513.5L261.8,508.4L260.4,507.6L260.0,503.0L257.2,504.1L251.8,509.0L252.7,512.8L250.9,514.1L247.0,514.1L246.7,512.4L243.9,510.7L242.5,508.1L243.4,506.8L238.8,503.6L236.5,502.9L233.4,499.7L231.8,502.5L225.5,502.9L223.4,505.4L223.9,509.7L221.1,514.2L221.2,517.1L219.8,518.9L217.9,518.8L217.2,521.3L213.0,521.0L210.2,525.9L207.7,525.7L205.0,523.5L202.1,525.3L203.5,528.3L198.3,527.0L195.7,527.9L194.1,525.0L194.3,521.2L189.4,515.6L190.3,511.5L189.0,509.5L185.1,508.6L182.7,507.3L184.4,504.8L189.6,494.5L194.2,492.2L197.1,493.2L199.7,491.0L204.9,490.8L206.6,488.6L206.7,486.5L210.6,486.5L212.8,488.9L213.7,484.8L209.1,482.8L206.7,484.1L201.4,483.3L197.0,483.6L195.3,485.0L190.7,484.0L187.6,481.1L187.3,476.4L189.7,473.0L191.8,472.7L195.9,468.0L199.5,466.2L200.8,466.7L204.8,462.8L208.0,458.3L207.4,452.0L210.0,450.6L217.2,450.3L220.9,451.1L226.2,453.7L227.1,450.0L221.5,447.3L217.2,443.9L216.3,442.0L221.2,439.7L228.5,439.9L229.9,438.6L230.2,435.4L228.0,434.0L226.2,436.1L221.9,435.7L220.5,436.7L217.2,435.4L214.3,435.3L213.2,437.0L206.4,436.6L205.8,431.8L206.4,427.7L203.9,426.9L195.4,428.1L194.4,423.2L200.5,422.4L210.0,422.0L213.0,421.1L214.7,418.7L220.5,419.4L221.7,418.5L223.5,414.9L226.9,413.6L231.3,413.3L233.8,411.2L238.2,409.1L239.6,404.2L239.4,400.8L241.8,396.4L245.8,396.6L250.1,393.9L254.3,395.7L256.0,395.1L258.6,397.1L261.9,396.2L263.4,403.9L266.0,406.3L272.7,407.6L273.1,404.9L277.1,405.4L278.5,403.8L281.1,405.0L281.7,402.8L287.0,403.7L287.7,400.8L290.5,401.7L293.2,400.8L294.7,398.8L298.8,398.0L300.9,401.5L301.5,404.5L301.7,410.2L303.4,413.2L306.8,417.4L310.0,414.5L312.3,417.5L313.8,421.2L315.4,420.6L317.8,422.1L320.2,421.7L323.7,419.9L324.6,416.8L324.3,413.4L331.1,414.7L332.3,416.7L334.5,417.4L336.1,412.2L334.6,412.1L335.3,408.1L337.0,407.8Z"], ["충청남도", "M174.0,321.9L177.1,322.9L178.8,326.7L177.8,331.7L178.6,336.7L182.5,345.7L183.5,352.6L181.4,354.7L179.8,353.3L176.6,352.7L175.2,353.9L171.0,349.4L169.6,344.8L170.5,341.1L168.9,330.5L167.5,328.9L167.5,326.3L171.3,322.6L174.0,321.9ZM243.9,275.8L255.0,271.0L259.6,272.1L263.3,270.4L265.0,270.5L270.1,265.1L272.2,266.3L274.0,265.3L279.9,268.3L281.4,268.4L283.7,271.8L286.7,273.8L290.1,274.5L292.6,277.6L294.9,278.9L294.7,282.4L298.5,283.8L298.2,287.5L301.0,287.9L304.3,290.2L306.9,293.1L306.0,294.9L308.2,296.7L308.2,299.1L306.2,300.7L305.0,298.8L298.5,299.8L299.1,303.0L297.1,303.0L295.0,304.8L294.9,307.4L292.1,309.6L287.3,308.9L281.7,304.2L276.4,302.9L272.7,307.1L273.9,309.5L276.1,309.4L276.6,311.6L275.3,313.7L275.7,318.3L275.5,323.0L278.8,324.7L280.2,327.0L280.3,329.5L277.6,334.0L278.8,336.2L277.4,337.8L281.7,346.1L281.3,348.9L284.4,352.0L288.5,354.2L291.6,353.2L291.5,359.5L290.2,361.6L291.1,363.6L288.7,367.0L288.7,371.9L287.4,373.9L291.5,376.7L291.7,381.4L295.8,383.7L296.9,386.6L299.1,388.8L300.7,385.2L302.1,383.9L301.6,377.0L303.2,375.7L305.3,376.8L304.9,379.1L306.7,381.8L307.7,385.0L312.1,388.0L315.4,384.7L315.3,383.4L318.5,381.1L321.7,380.6L323.4,379.4L325.7,380.9L329.5,381.8L331.9,384.3L331.3,387.8L332.4,393.1L330.9,397.5L334.5,402.0L334.5,403.8L337.0,407.8L335.3,408.1L334.6,412.1L336.1,412.2L334.5,417.4L332.3,416.7L331.1,414.7L324.3,413.4L324.6,416.8L323.7,419.9L320.2,421.7L317.8,422.1L315.4,420.6L313.8,421.2L312.3,417.5L310.0,414.5L306.8,417.4L303.4,413.2L301.7,410.2L301.5,404.5L300.9,401.5L298.8,398.0L294.7,398.8L293.2,400.8L290.5,401.7L287.7,400.8L287.0,403.7L281.7,402.8L281.1,405.0L278.5,403.8L277.1,405.4L273.1,404.9L272.7,407.6L266.0,406.3L263.4,403.9L261.9,396.2L258.6,397.1L256.0,395.1L254.3,395.7L250.1,393.9L245.8,396.6L241.8,396.4L239.4,400.8L239.6,404.2L238.2,409.1L233.8,411.2L231.3,413.3L226.9,413.6L223.5,414.9L221.7,418.5L212.3,416.9L213.1,413.6L210.1,409.8L208.6,409.8L208.8,404.0L205.3,401.4L201.5,396.8L199.4,398.1L196.5,395.3L193.3,394.7L194.8,389.4L197.2,387.5L195.5,383.7L195.6,380.9L197.7,377.0L195.3,371.8L194.0,371.2L192.1,367.4L198.3,363.7L192.9,358.6L189.2,358.2L190.2,353.5L191.4,351.2L189.5,347.2L188.4,339.2L189.8,337.2L186.9,333.6L185.0,326.2L185.5,324.5L188.7,323.1L188.4,321.2L186.2,319.8L187.7,315.4L186.8,313.7L184.3,313.4L184.6,317.0L182.0,323.9L180.4,323.5L178.3,321.0L174.4,319.7L174.0,313.0L171.4,313.2L172.2,317.7L173.3,319.8L168.8,324.5L165.3,326.5L163.9,324.6L164.3,321.0L165.7,319.3L164.3,313.9L161.5,312.3L161.3,308.6L162.7,307.3L162.5,304.1L160.3,305.4L157.2,309.3L155.0,309.4L153.1,312.2L150.0,311.6L144.6,313.2L144.5,310.1L146.6,310.2L146.6,307.6L149.8,305.2L154.4,307.2L156.1,304.7L153.8,304.0L151.5,299.8L149.0,299.1L146.7,300.2L147.3,303.3L145.2,305.2L143.5,303.9L145.0,301.7L140.9,296.6L144.4,296.4L146.1,294.1L148.1,288.3L146.5,286.2L148.7,284.9L150.3,286.7L152.6,284.6L152.0,281.7L154.6,276.5L159.7,274.8L158.8,278.4L156.1,279.6L158.8,282.3L160.2,279.8L162.3,279.2L164.2,276.1L165.3,271.9L164.2,266.4L167.3,264.9L168.0,267.9L166.6,269.6L166.5,273.1L168.8,275.7L168.8,277.8L165.5,285.6L168.4,286.2L163.8,289.5L165.8,291.0L171.0,289.6L168.9,286.5L169.3,283.5L171.6,284.7L174.3,284.4L175.3,282.2L174.4,280.3L178.4,277.7L180.2,275.4L176.5,269.7L170.6,267.2L171.1,264.8L169.5,261.8L175.8,258.9L182.3,258.5L185.4,259.9L188.9,265.7L190.0,263.5L185.8,256.8L191.5,250.5L194.2,251.4L195.5,253.9L204.3,258.2L209.6,261.1L217.9,260.9L219.7,261.9L227.6,264.5L227.5,265.9L230.3,272.7L231.6,272.6L232.2,277.1L233.4,278.7L234.1,282.6L236.2,280.2L240.3,278.5L244.3,278.1L243.9,275.8Z"], ["충청북도", "M466.5,250.5L463.8,254.7L457.8,253.9L455.4,255.8L456.2,258.3L452.8,262.0L449.0,262.9L448.8,264.5L442.4,269.1L442.0,271.2L439.7,272.2L439.5,276.3L437.4,280.3L440.5,282.2L440.6,284.7L437.0,290.6L432.0,290.2L430.1,292.3L425.9,289.7L424.3,290.0L421.1,286.9L419.4,283.4L414.1,280.9L413.1,284.9L410.5,284.7L411.1,290.0L404.3,289.2L401.1,287.0L397.6,289.4L396.9,291.5L394.0,291.7L390.8,289.8L390.3,293.5L387.4,300.7L392.1,304.7L392.4,307.0L389.4,306.8L386.1,304.1L383.6,305.5L381.6,305.4L378.3,302.3L376.7,305.3L374.5,307.2L374.5,309.2L368.9,309.5L374.6,313.7L375.4,315.9L374.5,321.1L369.1,319.3L367.2,315.2L365.7,318.4L363.9,318.7L364.1,321.9L360.8,322.0L357.4,325.3L360.8,328.5L365.6,328.9L367.1,331.0L367.1,333.7L370.6,335.8L371.3,338.5L368.0,342.8L368.2,345.9L367.1,349.6L368.3,352.1L367.1,354.6L369.3,362.2L368.1,364.2L364.4,366.5L363.0,369.8L364.3,375.1L367.9,375.2L369.5,372.5L374.4,374.7L376.8,378.1L379.1,379.1L381.0,376.9L384.6,375.7L389.2,378.1L387.1,380.7L389.7,384.7L390.0,386.9L388.2,388.0L385.0,385.6L381.5,387.0L380.1,388.9L382.7,394.5L381.6,398.3L379.0,400.0L377.9,403.7L378.3,407.8L375.1,410.6L372.6,410.1L370.9,412.5L367.5,415.1L364.5,412.5L357.8,414.4L356.2,416.4L348.9,413.5L345.7,413.4L344.5,409.8L343.0,408.9L339.8,412.4L339.1,409.8L337.0,407.8L334.5,403.8L334.5,402.0L330.9,397.5L332.4,393.1L331.3,387.8L331.9,384.3L329.5,381.8L325.7,380.9L323.4,379.4L321.7,380.6L318.5,381.1L317.7,377.7L319.1,373.4L319.6,366.0L322.9,360.3L322.6,357.5L326.5,355.7L324.8,352.2L321.4,352.0L319.7,354.2L318.0,350.3L319.8,347.7L316.8,346.4L313.4,347.6L311.3,346.6L307.0,346.7L307.2,342.4L306.1,341.0L307.5,340.5L307.8,336.0L306.9,333.2L304.5,333.1L303.2,330.2L298.6,329.8L297.0,326.9L294.9,326.5L294.0,321.5L291.2,318.4L292.2,315.4L293.9,314.7L294.9,311.1L292.1,309.6L294.9,307.4L295.0,304.8L297.1,303.0L299.1,303.0L298.5,299.8L305.0,298.8L306.2,300.7L308.2,299.1L308.2,296.7L306.0,294.9L306.9,293.1L304.3,290.2L301.0,287.9L298.2,287.5L298.5,283.8L294.7,282.4L294.9,278.9L292.6,277.6L295.1,272.0L299.4,269.6L300.2,268.3L303.9,268.5L306.9,265.9L304.7,263.3L305.9,261.1L310.5,260.5L314.1,257.6L314.0,253.9L317.7,252.3L319.3,253.3L321.4,251.6L326.2,253.8L327.9,253.4L327.9,250.9L332.3,247.3L336.2,245.6L337.0,238.6L343.2,239.5L347.3,231.8L348.4,232.0L349.7,227.7L351.1,226.6L350.6,227.6L351.8,233.0L353.6,236.0L356.4,238.0L359.6,237.7L365.6,236.1L367.0,234.9L370.7,236.8L373.3,234.8L375.2,231.1L373.2,225.2L376.6,221.9L381.3,220.1L385.7,222.2L385.8,224.0L388.3,226.8L387.1,228.9L388.3,231.0L393.3,230.2L397.5,228.0L399.3,225.9L403.0,226.8L405.4,226.3L405.5,224.1L408.9,221.6L411.4,222.9L412.4,224.8L415.5,224.9L417.6,228.0L423.5,225.6L425.8,226.8L424.9,229.7L418.5,233.7L417.0,235.5L418.2,237.6L420.7,239.0L425.5,237.1L426.3,235.9L434.5,237.6L433.9,240.5L437.3,243.1L443.4,243.5L445.4,241.9L448.7,242.9L449.0,244.5L451.9,246.6L455.0,246.6L458.8,248.5L463.5,249.0L466.5,250.5Z"], ["강원도", "M557.4,237.7L554.3,237.9L549.7,240.6L548.5,242.8L545.7,242.4L544.9,244.7L542.8,245.7L539.7,249.2L540.6,253.8L535.8,254.4L528.9,247.9L523.2,245.0L520.7,246.1L519.2,250.1L508.8,247.5L505.9,248.6L503.9,245.8L501.0,246.3L497.7,253.7L495.1,253.7L491.3,252.6L488.8,248.5L486.5,248.6L483.5,247.0L480.9,250.7L479.3,251.7L480.5,255.3L479.3,256.3L477.1,254.5L472.7,254.3L471.2,252.4L466.5,250.5L463.5,249.0L458.8,248.5L455.0,246.6L451.9,246.6L449.0,244.5L448.7,242.9L445.4,241.9L443.4,243.5L437.3,243.1L433.9,240.5L434.5,237.6L426.3,235.9L425.5,237.1L420.7,239.0L418.2,237.6L417.0,235.5L418.5,233.7L424.9,229.7L425.8,226.8L423.5,225.6L417.6,228.0L415.5,224.9L412.4,224.8L411.4,222.9L408.9,221.6L405.5,224.1L405.4,226.3L403.0,226.8L399.3,225.9L397.5,228.0L393.3,230.2L388.3,231.0L387.1,228.9L388.3,226.8L385.8,224.0L385.7,222.2L381.3,220.1L376.6,221.9L373.2,225.2L375.2,231.1L373.3,234.8L370.7,236.8L367.0,234.9L365.6,236.1L359.6,237.7L356.4,238.0L353.6,236.0L351.8,233.0L350.6,227.6L351.1,226.6L351.2,221.8L352.4,220.1L352.0,213.8L353.7,212.2L352.6,208.7L352.6,202.9L354.8,202.2L354.9,199.4L357.0,193.9L358.2,193.1L357.2,187.7L354.5,183.2L354.4,180.9L358.5,176.4L363.1,175.8L364.0,173.5L359.4,171.7L356.8,168.4L353.4,168.8L351.8,167.3L346.0,168.3L344.5,166.1L339.0,162.6L335.7,159.4L332.5,158.0L329.6,160.9L327.0,161.6L324.1,159.3L326.2,156.4L325.8,152.6L327.4,147.0L324.6,147.3L320.4,145.5L325.1,140.8L322.2,135.9L324.0,133.1L322.7,130.9L323.6,128.0L327.4,125.8L330.2,122.6L332.3,122.8L334.5,117.8L333.9,112.6L332.6,110.1L325.1,108.0L325.5,106.4L324.5,102.9L319.6,103.1L315.9,102.0L314.1,100.4L312.2,93.7L312.7,91.8L311.9,85.9L310.6,84.8L308.3,86.9L307.1,85.2L304.6,84.9L296.6,88.0L295.3,84.7L291.7,84.6L290.8,81.3L292.3,79.0L292.5,75.1L290.2,74.3L288.3,77.2L284.1,79.8L279.8,77.6L278.5,73.9L276.8,71.5L277.2,69.3L276.3,66.4L274.5,64.7L272.2,66.3L269.6,64.8L270.1,61.1L269.5,56.9L273.1,54.1L273.9,51.1L275.9,50.2L278.8,52.9L280.7,52.7L286.7,49.5L288.7,50.6L293.1,51.3L295.2,53.0L298.8,50.6L300.0,51.1L305.1,49.3L309.8,50.2L312.9,52.9L316.3,52.8L317.7,55.1L320.5,55.1L324.7,51.7L330.7,49.3L333.1,49.2L337.1,51.1L343.7,50.4L345.0,48.8L348.8,49.7L350.9,48.1L354.9,47.2L358.0,51.7L363.3,50.9L368.5,48.8L373.7,49.8L380.4,52.4L391.4,53.5L402.5,47.6L410.8,42.7L414.3,39.5L415.1,37.9L419.3,34.3L421.7,28.5L423.5,13.9L422.9,9.6L424.3,6.8L428.1,6.2L434.0,13.5L435.1,17.5L437.3,20.5L437.3,23.1L439.4,27.6L443.0,31.8L441.5,32.5L441.8,35.1L443.5,38.2L449.1,44.3L450.5,49.6L453.6,53.4L455.9,60.6L458.6,64.8L458.1,66.7L459.5,71.7L461.0,74.0L461.1,79.2L464.4,84.6L468.4,88.5L469.8,92.6L473.0,96.5L476.0,99.2L477.2,102.2L482.0,110.1L484.2,111.7L484.2,113.3L489.8,119.1L489.3,121.2L495.3,128.3L495.5,129.9L509.4,144.1L512.7,149.0L518.1,154.2L518.2,156.5L516.6,159.3L517.9,162.7L525.9,169.9L526.5,172.9L525.3,175.7L526.5,178.6L531.4,185.6L534.9,188.9L536.2,195.2L539.2,198.2L542.9,200.7L543.0,203.5L545.1,206.6L545.4,209.9L549.5,212.9L549.3,214.6L553.0,216.6L552.7,218.9L556.5,223.7L554.5,225.2L555.4,227.3L554.3,230.1L554.5,232.8L557.4,237.7Z"], ["경기도", "M205.5,212.1L202.4,214.3L200.7,216.7L204.1,219.4L205.6,219.3L207.4,223.5L210.9,225.2L210.5,227.6L206.0,226.2L204.9,228.0L202.6,226.0L200.5,228.6L197.4,228.3L197.1,225.3L199.5,222.6L199.8,220.4L198.0,216.6L200.4,216.4L201.8,214.1L205.5,212.1ZM351.1,226.6L349.7,227.7L348.4,232.0L347.3,231.8L343.2,239.5L337.0,238.6L336.2,245.6L332.3,247.3L327.9,250.9L327.9,253.4L326.2,253.8L321.4,251.6L319.3,253.3L317.7,252.3L314.0,253.9L314.1,257.6L310.5,260.5L305.9,261.1L304.7,263.3L306.9,265.9L303.9,268.5L300.2,268.3L299.4,269.6L295.1,272.0L292.6,277.6L290.1,274.5L286.7,273.8L283.7,271.8L281.4,268.4L279.9,268.3L274.0,265.3L272.2,266.3L270.1,265.1L265.0,270.5L263.3,270.4L259.6,272.1L255.0,271.0L243.9,275.8L243.4,272.5L241.2,270.9L238.3,271.4L238.0,268.9L236.0,267.2L233.3,262.8L233.1,261.5L229.7,259.5L228.7,256.2L223.8,256.2L223.5,253.1L225.1,250.1L226.3,244.6L224.8,243.4L226.1,240.6L229.4,240.5L230.6,236.9L228.8,233.1L227.2,234.8L223.2,234.7L220.9,238.9L215.8,242.5L213.8,239.0L215.1,237.3L212.3,235.2L213.0,227.9L214.4,225.5L212.8,223.4L215.6,219.4L221.6,221.3L224.6,220.6L228.7,222.2L228.8,218.6L233.3,215.2L230.6,214.1L226.6,215.1L220.6,213.1L220.2,211.4L216.3,208.1L215.8,205.8L217.4,204.8L222.0,198.4L224.1,194.1L226.1,193.4L227.3,189.7L226.0,186.4L222.7,184.0L223.0,179.7L225.0,179.3L225.9,173.4L226.4,174.2L232.9,175.5L233.7,177.7L231.9,183.0L232.9,185.7L235.1,185.7L238.7,182.9L243.2,192.3L246.1,190.0L247.9,192.0L250.9,191.2L256.0,187.1L257.0,188.9L260.3,188.8L260.1,191.2L262.2,193.2L264.0,193.1L268.1,188.4L270.6,187.9L274.3,185.6L276.2,181.9L273.5,180.6L276.4,174.8L278.4,174.5L278.8,172.3L277.8,169.3L268.5,172.4L268.5,168.7L270.7,165.4L269.4,159.1L267.4,158.2L267.7,152.1L266.0,150.9L262.0,152.3L257.6,150.2L256.6,152.8L254.7,153.9L253.0,157.5L253.7,160.2L252.4,161.2L248.9,156.8L244.4,159.1L242.9,164.1L243.1,166.9L239.7,169.3L236.6,170.0L232.7,167.6L230.8,165.5L229.2,169.0L222.9,167.2L220.5,167.4L217.1,163.4L211.8,160.1L209.2,161.7L208.1,165.0L205.6,165.5L201.0,168.1L198.7,164.7L198.1,161.9L195.4,157.8L196.3,155.7L194.7,154.1L195.2,149.8L194.1,148.3L195.1,144.3L195.3,142.7L193.6,139.8L196.4,139.0L198.8,139.5L200.3,141.5L205.7,142.0L209.5,138.0L212.5,136.1L214.0,129.7L212.2,128.4L216.2,124.0L213.7,120.9L214.4,119.1L212.9,115.4L213.8,110.0L216.1,111.9L219.1,112.5L223.0,110.6L222.4,107.3L225.3,105.4L227.5,105.7L229.6,104.0L233.8,104.1L233.0,101.1L234.1,97.7L236.9,98.0L239.3,100.1L240.3,96.8L241.9,94.9L242.0,91.3L238.6,90.3L236.5,88.0L233.6,90.6L232.8,89.1L229.6,90.0L228.1,87.4L223.4,82.8L226.2,78.6L233.3,71.7L239.4,67.8L242.2,70.7L246.1,70.9L249.5,69.8L251.1,71.8L253.5,69.5L252.4,66.1L254.4,65.6L258.9,62.4L264.6,60.3L269.5,56.9L270.1,61.1L269.6,64.8L272.2,66.3L274.5,64.7L276.3,66.4L277.2,69.3L276.8,71.5L278.5,73.9L279.8,77.6L284.1,79.8L288.3,77.2L290.2,74.3L292.5,75.1L292.3,79.0L290.8,81.3L291.7,84.6L295.3,84.7L296.6,88.0L304.6,84.9L307.1,85.2L308.3,86.9L310.6,84.8L311.9,85.9L312.7,91.8L312.2,93.7L314.1,100.4L315.9,102.0L319.6,103.1L324.5,102.9L325.5,106.4L325.1,108.0L332.6,110.1L333.9,112.6L334.5,117.8L332.3,122.8L330.2,122.6L327.4,125.8L323.6,128.0L322.7,130.9L324.0,133.1L322.2,135.9L325.1,140.8L320.4,145.5L324.6,147.3L327.4,147.0L325.8,152.6L326.2,156.4L324.1,159.3L327.0,161.6L329.6,160.9L332.5,158.0L335.7,159.4L339.0,162.6L344.5,166.1L346.0,168.3L351.8,167.3L353.4,168.8L356.8,168.4L359.4,171.7L364.0,173.5L363.1,175.8L358.5,176.4L354.4,180.9L354.5,183.2L357.2,187.7L358.2,193.1L357.0,193.9L354.9,199.4L354.8,202.2L352.6,202.9L352.6,208.7L353.7,212.2L352.0,213.8L352.4,220.1L351.2,221.8L351.1,226.6Z"], ["세종특별자치시", "M292.1,309.6L294.9,311.1L293.9,314.7L292.2,315.4L291.2,318.4L294.0,321.5L294.9,326.5L297.0,326.9L298.6,329.8L303.2,330.2L304.5,333.1L306.9,333.2L307.8,336.0L307.5,340.5L306.1,341.0L304.3,339.7L301.4,342.0L301.7,344.4L300.7,347.9L297.3,352.0L293.2,352.0L291.6,353.2L288.5,354.2L284.4,352.0L281.3,348.9L281.7,346.1L277.4,337.8L278.8,336.2L277.6,334.0L280.3,329.5L280.2,327.0L278.8,324.7L275.5,323.0L275.7,318.3L275.3,313.7L276.6,311.6L276.1,309.4L273.9,309.5L272.7,307.1L276.4,302.9L281.7,304.2L287.3,308.9L292.1,309.6Z"], ["울산광역시", "M568.4,473.7L567.3,476.9L570.0,481.1L570.3,484.0L568.7,486.2L569.5,488.3L567.8,494.0L567.0,499.8L560.0,501.4L555.6,505.7L557.5,506.8L557.3,511.6L555.0,517.0L556.8,520.3L552.1,521.8L549.8,524.4L546.7,522.5L547.1,519.2L544.8,515.5L538.7,516.7L536.8,515.2L539.0,511.9L536.0,507.1L533.6,508.2L531.5,507.8L528.8,505.6L524.9,500.7L524.5,498.4L513.9,493.6L510.2,493.0L507.2,488.0L510.3,486.7L513.5,484.2L514.2,481.6L513.6,479.4L511.4,478.6L517.0,473.8L520.4,475.4L519.6,472.4L519.8,469.0L522.3,465.6L528.2,464.1L529.5,462.1L531.4,463.6L537.4,462.6L540.8,465.4L543.4,465.7L544.5,467.3L543.4,471.3L544.2,473.2L549.6,474.1L556.1,469.2L563.6,471.7L568.4,473.7Z"], ["대전광역시", "M318.5,381.1L315.3,383.4L315.4,384.7L312.1,388.0L307.7,385.0L306.7,381.8L304.9,379.1L305.3,376.8L303.2,375.7L301.6,377.0L302.1,383.9L300.7,385.2L299.1,388.8L296.9,386.6L295.8,383.7L291.7,381.4L291.5,376.7L287.4,373.9L288.7,371.9L288.7,367.0L291.1,363.6L290.2,361.6L291.5,359.5L291.6,353.2L293.2,352.0L297.3,352.0L300.7,347.9L301.7,344.4L301.4,342.0L304.3,339.7L306.1,341.0L307.2,342.4L307.0,346.7L311.3,346.6L313.4,347.6L316.8,346.4L319.8,347.7L318.0,350.3L319.7,354.2L321.4,352.0L324.8,352.2L326.5,355.7L322.6,357.5L322.9,360.3L319.6,366.0L319.1,373.4L317.7,377.7L318.5,381.1Z"], ["광주광역시", "M243.7,535.6L246.8,536.8L247.0,538.5L252.5,547.0L255.8,546.8L258.2,550.0L256.6,552.0L256.7,556.8L254.0,561.6L251.3,562.3L249.4,564.9L247.0,564.7L245.6,562.2L239.2,564.7L237.2,564.1L232.5,568.2L229.4,566.8L227.3,568.1L225.2,562.1L222.4,559.6L215.6,558.8L214.5,559.7L211.1,557.4L211.4,550.5L213.6,549.7L212.1,546.2L214.5,545.9L215.6,542.5L217.6,543.6L219.6,543.0L219.8,540.6L221.9,536.7L225.4,536.3L224.4,539.5L230.8,541.9L235.0,540.1L239.5,537.0L241.5,537.5L243.7,535.6Z"], ["인천광역시", "M201.8,181.7L202.6,183.5L200.3,185.0L197.2,185.4L192.7,187.3L191.3,190.1L184.3,194.4L181.5,194.3L181.0,192.6L178.4,190.4L175.4,190.2L173.3,187.1L175.6,186.3L183.1,181.3L187.2,182.0L189.6,181.2L191.5,176.9L195.1,177.6L200.1,179.6L201.8,181.7ZM229.2,169.0L225.9,173.4L225.0,179.3L223.0,179.7L222.7,184.0L226.0,186.4L227.3,189.7L226.1,193.4L224.1,194.1L222.0,198.4L221.0,199.6L212.3,206.6L206.7,206.7L206.0,201.8L204.3,200.1L204.3,193.2L203.6,187.6L205.1,182.4L204.9,177.5L205.3,173.4L203.7,172.5L201.0,168.1L205.6,165.5L208.1,165.0L209.2,161.7L211.8,160.1L217.1,163.4L220.5,167.4L222.9,167.2L229.2,169.0ZM169.9,142.5L168.8,147.8L172.1,150.5L175.4,151.1L176.0,155.4L171.7,159.2L169.4,159.6L169.6,156.3L168.4,153.2L164.3,150.9L162.4,149.0L164.3,147.6L164.8,143.4L169.9,142.5ZM161.8,132.1L165.3,133.9L169.7,133.8L170.7,134.7L168.4,138.6L165.2,140.2L162.6,139.3L159.5,140.0L156.9,142.0L154.4,139.5L156.3,136.0L156.4,133.7L158.2,132.0L161.8,132.1ZM195.1,144.3L194.1,148.3L195.2,149.8L194.7,154.1L196.3,155.7L195.4,157.8L195.6,160.0L197.8,165.4L194.8,166.7L193.8,169.4L191.8,167.7L189.2,168.7L188.3,166.5L183.5,167.3L179.5,167.1L176.1,164.6L175.4,160.9L179.6,158.1L177.3,151.9L172.9,149.4L171.7,147.1L171.5,142.7L173.2,141.1L172.5,135.8L175.4,133.7L178.2,130.5L183.7,129.6L187.2,133.8L192.8,137.2L193.3,140.3L195.1,144.3ZM-39.9,105.9L-37.3,105.5L-34.3,106.4L-34.1,110.3L-37.0,111.8L-38.6,116.2L-46.1,115.1L-49.4,109.2L-48.9,106.6L-45.9,107.9L-39.9,105.9Z"], ["대구광역시", "M450.5,468.8L448.3,470.0L447.7,475.6L445.2,476.2L440.3,475.7L438.4,478.2L432.0,480.7L430.6,480.0L432.5,479.8L434.7,475.1L432.0,473.0L428.6,469.0L428.1,465.5L429.2,464.8L436.6,467.1L438.6,465.5L438.5,462.0L433.4,458.8L432.6,456.0L435.3,450.7L436.9,448.7L443.2,448.9L444.2,445.9L442.0,443.7L437.2,442.1L433.1,442.2L432.5,439.9L434.8,436.1L436.6,431.1L439.6,428.9L444.0,428.7L442.9,433.4L443.9,435.2L446.2,435.0L450.1,431.6L451.5,428.2L450.5,422.4L454.3,423.3L458.6,422.0L462.1,417.6L471.5,416.3L475.9,417.9L476.6,421.0L478.5,423.2L477.5,425.5L478.4,427.5L477.5,429.9L479.9,432.1L480.7,437.0L479.2,441.2L473.7,446.0L474.7,449.3L470.4,451.8L472.1,456.8L471.6,460.9L470.5,462.5L468.0,462.8L464.7,465.1L462.8,465.4L461.2,462.0L462.0,460.1L457.3,459.8L452.7,463.0L450.5,468.8Z"], ["부산광역시", "M549.8,524.4L544.8,526.1L544.2,532.0L542.0,534.7L543.3,537.5L540.7,542.6L539.7,547.0L536.3,548.3L535.7,551.0L528.4,552.2L526.3,555.3L527.3,559.0L526.5,560.7L523.0,560.8L519.5,559.4L519.3,557.1L517.3,556.9L516.1,559.4L519.7,561.3L521.1,565.2L523.2,567.0L521.5,568.5L515.4,563.0L513.8,566.6L511.1,568.8L508.6,568.9L506.7,571.2L504.7,564.1L500.9,562.8L499.7,563.9L489.8,563.8L491.8,568.3L491.7,571.2L490.0,574.4L486.1,573.2L486.9,570.1L485.0,567.9L488.0,566.9L489.3,564.9L488.3,560.8L490.8,559.6L489.5,556.0L485.7,554.0L484.6,551.5L490.9,551.5L493.8,550.1L495.8,547.7L494.4,544.6L496.1,542.7L501.2,542.3L510.6,539.5L512.5,533.3L517.3,532.3L518.6,529.8L520.3,530.7L522.3,528.6L525.2,527.7L527.2,522.0L529.9,519.0L533.2,521.0L535.6,519.5L536.8,515.2L538.7,516.7L544.8,515.5L547.1,519.2L546.7,522.5L549.8,524.4Z"], ["서울특별시", "M225.9,173.4L229.2,169.0L230.8,165.5L232.7,167.6L236.6,170.0L239.7,169.3L243.1,166.9L242.9,164.1L244.4,159.1L248.9,156.8L252.4,161.2L253.7,160.2L253.0,157.5L254.7,153.9L256.6,152.8L257.6,150.2L262.0,152.3L266.0,150.9L267.7,152.1L267.4,158.2L269.4,159.1L270.7,165.4L268.5,168.7L268.5,172.4L277.8,169.3L278.8,172.3L278.4,174.5L276.4,174.8L273.5,180.6L276.2,181.9L274.3,185.6L270.6,187.9L268.1,188.4L264.0,193.1L262.2,193.2L260.1,191.2L260.3,188.8L257.0,188.9L256.0,187.1L250.9,191.2L247.9,192.0L246.1,190.0L243.2,192.3L238.7,182.9L235.1,185.7L232.9,185.7L231.9,183.0L233.7,177.7L232.9,175.5L226.4,174.2L225.9,173.4Z"]], "L0": 125.0, "B1": 38.65, "K": 0.8090169943749475, "sx": 157.79591202125013};
+const MEMBERS=[
+  {id:'hw',name:'최현우',rank:'팀장',c:'--c0',lead:true},
+  {id:'yh',name:'이윤행',rank:'책임',c:'--c1'},
+  {id:'js',name:'오진식',rank:'매니저',c:'--c2'},
+  {id:'yi',name:'조영일',rank:'매니저',c:'--c3'},
+  {id:'hd',name:'김형동',rank:'매니저',c:'--c4'},
+  {id:'gr',name:'박기림',rank:'매니저',c:'--c5'},
+  {id:'ws',name:'김원석',rank:'매니저',c:'--c6'}
+];
+const OFFICES=['용인사무실','안성사무실'];
+const REGIONS=['서울','인천','경기','강원도','대전','대구','충청도','전라도','경상도','제주'];
+const ZONES={'서울':['강동','강서','강남'],'경기':['수원','용인','경기 남부','경기 서부','경기 동부','경기 북부'],'충청도':['청주','천안','아산'],'전라도':['광주','전주','익산','군산']};
+// 위치 좌표 [경도, 위도] — 지도 표시용 대략 위치
+const COORD={
+  '용인사무실':[127.18,37.24],'안성사무실':[127.28,37.01],
+  '서울':[126.98,37.56],'강동':[127.13,37.54],'강서':[126.85,37.55],'강남':[127.04,37.50],
+  '인천':[126.70,37.46],'경기':[127.25,37.45],'수원':[127.01,37.27],'용인':[127.20,37.24],
+  '경기 남부':[127.08,37.0],'경기 서부':[126.80,37.32],'경기 동부':[127.48,37.30],'경기 북부':[127.05,37.80],
+  '강원도':[128.2,37.75],'대전':[127.38,36.35],'대구':[128.60,35.87],'충청도':[127.30,36.62],'청주':[127.49,36.64],'천안':[127.15,36.81],'아산':[127.00,36.79],
+  '전라도':[127.05,35.45],'광주':[126.85,35.16],'전주':[127.15,35.82],'익산':[126.96,35.95],'군산':[126.74,35.97],
+  '경상도':[128.75,35.55],'제주':[126.55,33.40]
+};
+const KEY='kaa-sched-v2';
+const $=s=>document.querySelector(s);
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const WD=['일','월','화','수','목','금','토'];
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+let mem={};
+function load(){try{const s=localStorage.getItem(KEY);if(s)return JSON.parse(s)}catch(e){}return null}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}}
+let DB=load();
+if(!DB)DB={days:{}};
+
+// state
+const today=new Date();today.setHours(0,0,0,0);
+let sel=ymd(today.getDay()===0?new Date(today.getTime()+864e5):today.getDay()===6?new Date(today.getTime()+2*864e5):today);
+let view=new Date(sel+'T00:00:00');view.setDate(1);
+let monthPicker=false;let zoom='kr';let half='am';let lastPos={};
+function defaultHalf(){half=(sel===ymd(today)&&new Date().getHours()>=13)?'pm':'am';document.querySelectorAll('#halfSeg button').forEach(x=>x.classList.toggle('on',x.dataset.h===half))}
+
+function placeText(e){if(!e)return'';if(e.place==='내부')return e.office||'내부';return [e.region,e.zone].filter(Boolean).join(' · ')}
+function locKey(e){if(e.place==='내부')return e.office;return e.zone||e.region}
+function pmOf(e){return e.pm&&e.pm.place?e.pm:e}
+function moved(e){return !!(e.pm&&e.pm.place&&locKey(e.pm)!==locKey(e))}
+function placeLabel(e){if(!e)return'';return moved(e)?placeText(e)+' → '+placeText(e.pm):placeText(e)}
+function placeShort(e){if(!e)return'';const a=locKey(e)||'';return moved(e)?a+' → '+locKey(e.pm):a}
+function placeHalf(e){return moved(e)?'오전 '+placeText(e)+' → 오후 '+placeText(e.pm):'오전·오후 '+placeText(e)}
+function hm(m){const h=Math.floor(m/60),mi=m%60;const ap=h<12?'오전':'오후';const h12=h%12===0?12:h%12;return {ap,txt:h12+':'+pad(mi)}}
+function hmS(m){const x=hm(m);return x.ap+' '+x.txt}
+function dayLabel(s){const d=new Date(s+'T00:00:00');return (d.getMonth()+1)+'월 '+d.getDate()+'일 ('+WD[d.getDay()]+')'}
+
+// org
+function renderOrg(){
+  const day=DB.days[sel]||{};
+  const L=MEMBERS[0],le=day[L.id];$('#leadCard').innerHTML=`${L.name} ${L.rank}<small>출품영업팀</small><span class="st ${le?'':'no'}">${le?placeShort(le):'미입력'}</span>`;
+  $('#members').innerHTML=MEMBERS.filter(m=>!m.lead).map(m=>{const e=day[m.id];return `<button class="mem ${e?'done':''}" style="--mc:var(${m.c})" data-m="${m.id}"><div class="nm"><i></i>${m.name}</div><div class="rk">${m.rank}</div><div class="st ${e?'':'no'}">${e?placeShort(e):'미입력'}</div></button>`}).join('');
+}
+
+// calendar
+function renderCal(){
+  const y=view.getFullYear(),mo=view.getMonth();
+  $('#calTitle').textContent=y+'년 '+(mo+1)+'월 ▾';
+  if(monthPicker){
+    $('#calBody').innerHTML=`<div class="mp">${Array.from({length:12},(_,i)=>`<button data-mo="${i}" class="${i===mo?'on':''}">${i+1}월</button>`).join('')}</div>`;
+    $('#calTitle').textContent=y+'년 ▴';return;
+  }
+  const first=new Date(y,mo,1);let start=new Date(first);
+  const dw=first.getDay();const back=dw===0?-1:dw===6?-2:dw-1; // to Monday
+  start.setDate(1-(dw===0?6:dw-1));
+  if(dw===0||dw===6){start=new Date(y,mo,1+(dw===0?1:2));} // month starts on weekend → first Monday
+  const cells=[];let d=new Date(start);
+  const last=new Date(y,mo+1,0);
+  while(d<=last||cells.length%5!==0){
+    if(d.getDay()!==0&&d.getDay()!==6)cells.push(new Date(d));
+    d.setDate(d.getDate()+1);
+    if(cells.length>30)break;
+  }
+  const t=ymd(today);
+  let h='<div class="wk">'+['월','화','수','목','금'].map(w=>`<div>${w}</div>`).join('')+'</div><div class="days">';
+  for(const c of cells){
+    const k=ymd(c);const day=DB.days[k]||{};const ids=MEMBERS.filter(m=>day[m.id]);
+    const cls=['day',c.getMonth()!==mo?'out':'',k===t?'today':'',k===sel?'sel':''].join(' ');
+    h+=`<button class="${cls}" data-d="${k}" aria-label="${dayLabel(k)}"><span class="n">${c.getDate()}</span><span><span class="dots">${ids.map(m=>`<i style="--mc:var(${m.c})"></i>`).join('')}</span>${ids.length?`<span class="cnt">${ids.length}/${MEMBERS.length}</span>`:''}</span></button>`;
+  }
+  $('#calBody').innerHTML=h+'</div>';
+}
+
+// day panel
+function renderDay(){
+  const day=DB.days[sel]||{};const n=MEMBERS.filter(m=>day[m.id]).length;
+  $('#dpTitle').textContent=dayLabel(sel);
+  $('#dpCount').textContent='입력 '+n+' / '+MEMBERS.length;
+  $('#dpList').innerHTML=MEMBERS.map(m=>{const e=day[m.id];
+    return `<button class="row" style="--mc:var(${m.c})" data-m="${m.id}"><span class="av">${m.name[0]}</span><span class="rb"><span class="l1"><b>${m.name}</b>${e?`<span class="tag ${e.type==='신규'?'new':''}">${e.type}거래처</span><span class="tag">${hmS(e.in)} ~ ${hmS(e.out)}</span>`:''}</span><span class="l2">${e?esc(placeHalf(e)):'아직 입력하지 않았어요'}</span></span><span class="go ${e?'':'no'}">${e?'보기':'입력'} ›</span></button>`}).join('');
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+// map
+function proj([lon,lat]){return [(lon-GEO.L0)*GEO.K*GEO.sx,(GEO.B1-lat)*GEO.sx]}
+const VB={kr:[0,0,GEO.w,GEO.h]};
+(function(){const a=proj([126.45,37.98]),b=proj([127.75,36.72]);VB.cap=[a[0],a[1],b[0]-a[0],b[1]-a[1]]})();
+function renderMap(animate){
+  const svg=$('#map');const vb=VB[zoom];svg.setAttribute('viewBox',vb.join(' '));
+  const s=vb[2]/600*Math.max(1,Math.min(1.8,520/(svg.clientWidth||520))); // 화면이 작으면 글자 키움
+  let h=GEO.p.map(([n,d])=>`<path d="${d}"><title>${n}</title></path>`).join('');
+  const day=DB.days[sel]||{};
+  const on=MEMBERS.filter(m=>day[m.id]&&COORD[locKey(day[m.id])]);
+  // 오전→오후 이동 경로(점선)
+  on.forEach(m=>{const e=day[m.id];if(!moved(e)||!COORD[locKey(e.pm)])return;const a=proj(COORD[locKey(e)]),b=proj(COORD[locKey(e.pm)]);
+    h+=`<line class="trail" x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${css(m.c)}" stroke-width="${2*s}"/>`});
+  const groups={};
+  on.forEach(m=>{const o=half==='pm'?pmOf(day[m.id]):day[m.id];const k=locKey(o);if(!COORD[k])return;(groups[k]=groups[k]||[]).push(m)});
+  const pos={};const r=9*s,fs=15*s,lh=19*s;
+  for(const k in groups){const [x,y]=proj(COORD[k]);const ms=groups[k];
+    ms.forEach((m,i)=>{pos[m.id]=[x,y];const col=css(m.c);const ty=(i-(ms.length-1)/2)*lh;
+      h+=`<g class="mk mm" data-m="${m.id}" style="transform:translate(${x}px,${y}px)">`+(i===0?`<circle class="pulse" r="${r*1.6}" fill="${col}"/>`:'')+`<circle r="${r*.62}" fill="${col}" stroke="${css('--card')}" stroke-width="${2.2*s}"/><text x="${r*1.3}" y="${ty}" dy=".35em" font-size="${fs}" fill="${col}" stroke-width="${3.5*s}">${m.name}${moved(day[m.id])?(half==='am'?' ↗':' ✓'):''}</text>`+(i===ms.length-1?`<text x="${r*1.3}" y="${ty+lh-2*s}" dy=".35em" font-size="${fs*.72}" fill="${css('--mute')}" stroke-width="${3*s}" font-weight="600">${k}</text>`:'')+`</g>`;
+    })}
+  svg.innerHTML=h;
+  if(animate){ // 이전 위치에서 새 위치로 이동
+    const gs=[...svg.querySelectorAll('.mm')];
+    gs.forEach(g=>{const p=lastPos[g.dataset.m],q=pos[g.dataset.m];if(p&&q&&(p[0]!==q[0]||p[1]!==q[1])){g.style.transition='none';g.style.transform=`translate(${p[0]}px,${p[1]}px)`}});
+    svg.getBoundingClientRect();
+    requestAnimationFrame(()=>gs.forEach(g=>{const q=pos[g.dataset.m];g.style.transition='';g.style.transform=`translate(${q[0]}px,${q[1]}px)`}));
+  }
+  lastPos=pos;
+  const mv=on.filter(m=>moved(day[m.id])).length;
+  $('#mapTitle').textContent=dayLabel(sel)+' '+(half==='am'?'오전':'오후')+' 위치'+(mv?` · 이동 ${mv}명`:'');
+  $('#legend').innerHTML=on.length?on.map(m=>`<span style="--mc:var(${m.c})"><i></i><b>${m.name}</b> ${placeLabel(day[m.id])}</span>`).join(''):'<div class="empty" style="width:100%">이 날은 아직 입력된 위치가 없어요</div>';
+}
+$('#halfSeg').onclick=e=>{const b=e.target.closest('[data-h]');if(!b||b.dataset.h===half)return;half=b.dataset.h;document.querySelectorAll('#halfSeg button').forEach(x=>x.classList.toggle('on',x===b));renderMap(true)};
+function autoZoom(){const day=DB.days[sel]||{};const es=[];MEMBERS.forEach(m=>{const e=day[m.id];if(e){es.push(e);if(moved(e))es.push(e.pm)}});const inCap=es.length&&es.every(e=>{const c=COORD[locKey(e)];return c&&c[0]>=126.45&&c[0]<=127.75&&c[1]>=36.72&&c[1]<=37.98});zoom=inCap?'cap':'kr';document.querySelectorAll('#zoomSeg button').forEach(x=>x.classList.toggle('on',x.dataset.z===zoom))}
+function renderAll(){autoZoom();renderOrg();renderCal();renderDay();renderMap()}
+
+// events
+$('#calBody').addEventListener('click',e=>{
+  const mb=e.target.closest('[data-mo]');if(mb){view=new Date(view.getFullYear(),+mb.dataset.mo,1);monthPicker=false;renderCal();return}
+  const b=e.target.closest('[data-d]');if(!b)return;sel=b.dataset.d;defaultHalf();
+  const d=new Date(sel+'T00:00:00');if(d.getMonth()!==view.getMonth()){view=new Date(d.getFullYear(),d.getMonth(),1)}
+  renderAll();
+  if(matchMedia('(max-width:900px)').matches)$('.daypanel').scrollIntoView({behavior:'smooth',block:'start'});
+});
+$('#prev').onclick=()=>{if(monthPicker)view=new Date(view.getFullYear()-1,view.getMonth(),1);else view=new Date(view.getFullYear(),view.getMonth()-1,1);renderCal()};
+$('#next').onclick=()=>{if(monthPicker)view=new Date(view.getFullYear()+1,view.getMonth(),1);else view=new Date(view.getFullYear(),view.getMonth()+1,1);renderCal()};
+$('#calTitle').onclick=()=>{monthPicker=!monthPicker;renderCal()};
+$('#goToday').onclick=()=>{monthPicker=false;const t=new Date(today);if(t.getDay()===0)t.setDate(t.getDate()+1);if(t.getDay()===6)t.setDate(t.getDate()+2);sel=ymd(t);view=new Date(t.getFullYear(),t.getMonth(),1);renderAll()};
+$('#zoomSeg').onclick=e=>{const b=e.target.closest('[data-z]');if(!b)return;zoom=b.dataset.z;document.querySelectorAll('#zoomSeg button').forEach(x=>x.classList.toggle('on',x===b));renderMap()};
+document.addEventListener('click',e=>{const b=e.target.closest('.mem,.row,.lead');if(b&&b.dataset.m)openSheet(b.dataset.m)});
+
+// sheet
+let cur=null,draft=null;
+function openSheet(id){
+  cur=MEMBERS.find(m=>m.id===id);
+  const e=(DB.days[sel]||{})[id];
+  draft=e?JSON.parse(JSON.stringify(e)):{in:570,out:1050,type:'',place:'',memo:''};
+  $('#shAv').textContent=cur.name[0];$('#shAv').style.setProperty('--mc',`var(${cur.c})`);
+  $('#shName').textContent=cur.name+' '+cur.rank;$('#shDate').textContent=dayLabel(sel)+(e?' · 저장됨':' · 새로 입력');
+  applyMode();
+  renderForm();$('#shBody').scrollTop=0;
+  $('#scrim').classList.add('on');$('#sheet').classList.add('on');document.body.style.overflow='hidden';
+}
+// 본인 확인: claude.ai 계정 id(없으면 이 기기 고유값)
+let MYID=null;
+function deviceId(){try{let v=localStorage.getItem('kaa-sched-dev');if(!v){v='dev_'+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem('kaa-sched-dev',v)}return v}catch(e){return 'dev_tmp'}}
+MYID=deviceId();
+let MODE={k:'new'};
+const OPENED=new Set();const kOf=(d,id)=>d+'_'+id;
+async function sha(t){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('kaa-sched:'+t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){return 'p'+t}}
+function canSeeMemo(d,id){const e=(DB.days[d]||{})[id];return !!e&&(unlocked||OPENED.has(kOf(d,id)))}
+function sheetMode(e,id){
+  const isToday=sel===ymd(today);
+  if(!e)return isToday?{k:'new',msg:'저장 후 오늘 안에 수정은 1번만 할 수 있어요',pinSet:true}:{k:'ro',msg:'일정은 당일에만 입력할 수 있어요',foot:'당일에만 입력할 수 있어요'};
+  const own=OPENED.has(kOf(sel,id));
+  if(!e.pin&&!own)return {k:'ro',msg:unlocked?'전체 보기 중이에요':'비밀번호 없이 저장된 예전 일정이에요 · 팀장 확인 후 다시 입력해 주세요',foot:'보기 전용이에요'};
+  if(!own)return {k:'ro',lock:true,msg:unlocked?'전체 보기 중이에요 · 수정은 본인 비밀번호로 열어야 해요':'🔒 본인 비밀번호를 넣으면 내용 보기·수정을 할 수 있어요',foot:'본인 비밀번호로 열 수 있어요'};
+  if(!isToday)return {k:'ro',msg:'지난 일정은 수정할 수 없어요',foot:'당일에만 수정할 수 있어요'};
+  if((e.edits||0)>=1)return {k:'ro',msg:'수정 기회를 모두 사용했어요 (남은 수정 0번)',foot:'수정 기회를 모두 사용했어요'};
+  return {k:'edit',msg:'수정 1번 남았어요',pinSet:!e.pin};
+}
+function applyMode(){
+  const e=(DB.days[sel]||{})[cur.id];MODE=sheetMode(e,cur.id);
+  const ro=MODE.k==='ro';$('#shBody').classList.toggle('ro',ro);$('#fMemo').readOnly=ro;
+  const nt=$('#shNotice');nt.hidden=!MODE.msg;nt.className='notice'+(ro?' ro':'');nt.textContent=MODE.msg||'';
+  $('#shSave').hidden=ro;$('#shNote').hidden=!ro;$('#shNote').textContent=ro?(MODE.foot||'보기 전용이에요'):'';
+  $('#shDel').hidden=!(e&&unlocked);
+  $('#pinSet').hidden=!MODE.pinSet;$('#fPin').value='';
+  const po=$('#pinOpen');
+  if(MODE.lock){
+    po.innerHTML=`<div class="unl"><input id="pinIn" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="내 비밀번호 (숫자 2자리 이상)" autocomplete="off"><button id="pinGo">열기</button></div>`;
+    const go=async()=>{const v=$('#pinIn').value;if(!/^\d{2,}$/.test(v)){$('#pinIn').classList.add('err');return}
+      if(await sha(v)===e.pin){OPENED.add(kOf(sel,cur.id));draft=JSON.parse(JSON.stringify(e));applyMode();renderForm();renderDay();toast('내 일정을 열었어요')}
+      else{const i=$('#pinIn');i.classList.add('err');i.value='';i.placeholder='비밀번호가 달라요'}};
+    $('#pinGo').onclick=go;$('#pinIn').onkeydown=ev=>{if(ev.key==='Enter')go()};
+  }else po.innerHTML='';
+  setMemoField(e);
+}
+function closeSheet(){$('#scrim').classList.remove('on');$('#sheet').classList.remove('on');document.body.style.overflow=''}
+$('#shClose').onclick=closeSheet;$('#scrim').onclick=closeSheet;
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
+function chip(val,on,label,big,small){return `<button class="chip ${big?'big':''} ${on?'on':''}" data-v="${val}">${label||val}${small?`<small>${small}</small>`:''}</button>`}
+function renderForm(){
+  const a=hm(draft.in),b=hm(draft.out);
+  $('#tvIn').innerHTML=`<small>${a.ap}</small>${a.txt}`;$('#tvOut').innerHTML=`<small>${b.ap}</small>${b.txt}`;
+  $('#fType').innerHTML=chip('기존',draft.type==='기존','기존거래처',true)+chip('신규',draft.type==='신규','신규거래처',true);
+  const same=!draft.pm;
+  let ph=pickerHTML(draft,'am',same?'장소 <span class="hb">오전·오후</span>':'장소 <span class="hb">오전</span>');
+  ph+=`<button class="sw ${same?'on':''}" id="swSame"><span>오전·오후 같은 장소</span><span class="tg"></span></button>`;
+  if(!same)ph+=pickerHTML(draft.pm,'pm','장소 <span class="hb">오후</span>');
+  $('#fPlaces').innerHTML=ph;
+  $('#ctr').textContent=($('#fMemo').value||'').length;
+  const ok=valid();$('#shSave').disabled=!ok;$('#shSave').textContent=ok?(MODE.k==='edit'?'수정 저장 (1번 남음)':'저장'):missing();
+}
+function crumbOf(o){return o.place?(o.place==='내부'?(o.office||''):[o.region,o.zone].filter(Boolean).join(' › ')):''}
+function pickerHTML(o,k,label){
+  let h=`<div class="pblock" data-k="${k}"><div class="fl" style="margin:0"><span>${label}</span><span class="crumb">${crumbOf(o)}</span></div><div class="chips c2" data-f="place">${chip('내부',o.place==='내부','내부',true,'용인 · 안성 사무실')+chip('외부',o.place==='외부','외부',true,'지역 선택')}</div>`;
+  if(o.place==='내부')h+=`<div class="sub"><div class="chips c2" data-f="office">${OFFICES.map(x=>chip(x,o.office===x)).join('')}</div></div>`;
+  if(o.place==='외부'){
+    h+=`<div class="sub"><div class="fl" style="margin:0">지역</div><div class="chips c3" data-f="region">${REGIONS.map(x=>chip(x,o.region===x)).join('')}</div></div>`;
+    if(o.region&&ZONES[o.region])h+=`<div class="sub"><div class="fl" style="margin:0">${o.region} 권역</div><div class="chips ${ZONES[o.region].length>3?'c2':'c3'}" data-f="zone">${ZONES[o.region].map(z=>chip(z,o.zone===z)).join('')}</div></div>`;
+  }
+  return h+'</div>';
+}
+function placeMissing(o,p){
+  if(!o.place)return p+'장소를 선택해 주세요';
+  if(o.place==='내부'&&!o.office)return p+'사무실을 선택해 주세요';
+  if(o.place==='외부'&&!o.region)return p+'지역을 선택해 주세요';
+  if(o.place==='외부'&&ZONES[o.region]&&!o.zone)return p+'권역을 선택해 주세요';
+  return '';
+}
+function valid(){return !missing()}
+function missing(){
+  if(MODE.pinSet&&!/^\d{2,}$/.test($('#fPin').value))return '비밀번호를 숫자 2자리 이상 넣어 주세요';
+  if(draft.out<=draft.in)return '퇴근 시간을 확인해 주세요';
+  if(!draft.type)return '영업구분을 선택해 주세요';
+  return placeMissing(draft,draft.pm?'오전 ':'')||(draft.pm?placeMissing(draft.pm,'오후 '):'');
+}
+document.querySelectorAll('.stp button').forEach(b=>b.onclick=()=>{const k=b.dataset.t;draft[k]=Math.min(22*60,Math.max(6*60,draft[k]+ +b.dataset.d));renderForm()});
+$('#fType').onclick=e=>{const b=e.target.closest('[data-v]');if(b){draft.type=b.dataset.v;renderForm()}};
+$('#fPlaces').onclick=e=>{
+  if(e.target.closest('#swSame')){draft.pm=draft.pm?null:{};if(!draft.pm)delete draft.pm;renderForm();return}
+  const b=e.target.closest('[data-v]');if(!b)return;const blk=b.closest('[data-k]');const o=blk.dataset.k==='pm'?draft.pm:draft;const f=b.closest('[data-f]').dataset.f;const v=b.dataset.v;
+  if(f==='place'){if(o.place!==v){o.place=v;delete o.office;delete o.region;delete o.zone}}
+  else{o[f]=v;if(f==='region')delete o.zone}
+  renderForm();
+};
+$('#fPin').oninput=e=>{e.target.value=e.target.value.replace(/\D/g,'');renderForm()};
+$('#fMemo').oninput=e=>{$('#ctr').textContent=e.target.value.length};
+$('#shSave').onclick=async()=>{
+  if(MODE.k==='ro'||!valid())return;
+  const prev=(DB.days[sel]||{})[cur.id];
+  draft.memo=$('#fMemo').value.slice(0,200).trim();
+  draft.uid=(prev&&prev.uid)||MYID;draft.edits=prev?(prev.edits||0)+1:0;
+  if(MODE.pinSet)draft.pin=await sha($('#fPin').value);else if(prev&&prev.pin)draft.pin=prev.pin;
+  OPENED.add(kOf(sel,cur.id));
+  const clean=o=>{if(o.place==='내부'){delete o.region;delete o.zone}else{delete o.office;if(!ZONES[o.region])delete o.zone}};clean(draft);if(draft.pm){clean(draft.pm);if(!moved(draft))delete draft.pm}
+  const who=cur,day=sel,body=draft;(DB.days[day]=DB.days[day]||{})[who.id]=body;closeSheet();renderAll();
+  saveEntry(day,who.id,body).then(()=>toast(body.edits?'수정했어요 · 남은 수정 0번':'저장했어요 · 오늘 안에 1번 수정할 수 있어요')).catch(()=>toast('저장에 실패했어요. 다시 시도해 주세요'));
+};
+$('#shDel').onclick=()=>{
+  if($('#shDel').dataset.confirm!=='1'){$('#shDel').dataset.confirm='1';$('#shDel').textContent='한 번 더 누르면 삭제';setTimeout(()=>{$('#shDel').dataset.confirm='';$('#shDel').textContent='삭제'},2500);return}
+  const who=cur,day=sel;delete DB.days[day][who.id];removeEntry(day,who.id).catch(()=>toast('삭제에 실패했어요'));$('#shDel').dataset.confirm='';$('#shDel').textContent='삭제';closeSheet();renderAll();toast('삭제했어요');
+};
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1800)}
+
+
+// 내용 보기 잠금 (작성은 누구나, 보기는 비밀번호)
+const VIEW_PW='12';
+let unlocked=false;
+function unlockUI(box,onOk){
+  box.innerHTML=`<div class="unl"><input type="password" inputmode="numeric" autocomplete="off" placeholder="비밀번호 입력" aria-label="내용 보기 비밀번호"><button>확인</button></div>`;
+  const inp=box.querySelector('input'),btn=box.querySelector('button');
+  const go=()=>{if(inp.value===VIEW_PW){unlocked=true;box.innerHTML='';renderLock();renderDay();onOk&&onOk();if($('#sheet').classList.contains('on'))applyMode();toast('전체 보기를 켰어요')}else{inp.classList.add('err');inp.value='';inp.placeholder='비밀번호가 달라요';}};
+  btn.onclick=go;inp.onkeydown=e=>{if(e.key==='Enter')go()};inp.focus();
+}
+function renderLock(){const b=$('#lockBtn');b.textContent=unlocked?'🔓 전체 보기 중':'🔒 전체 보기';b.classList.toggle('on',unlocked)}
+$('#lockBtn').onclick=()=>{if(unlocked){unlocked=false;renderLock();renderDay();if($('#sheet').classList.contains('on'))closeSheet();toast('다시 잠갔어요');return}
+  const box=$('#dpUnlock');if(box.innerHTML){box.innerHTML='';return}unlockUI(box)};
+function setMemoField(e){
+  const ta=$('#fMemo');$('#memoLock').innerHTML='';
+  if(e&&!canSeeMemo(sel,cur.id)){ta.value='';ta.placeholder='🔒 내용이 잠겨 있어요'}
+  else{ta.value=e?(e.memo||''):'';ta.placeholder=e&&MODE.k==='ro'?'작성한 내용이 없어요':'오전, 오후로 나눠서 어디 매매단지에 누구를 만나고 내용 아주 간략히 기재'}
+  $('#ctr').textContent=ta.value.length;
+}
+
+// demo
+// 저장소: claude.ai 아티팩트에서는 팀 공유 DB, 그 외(GitHub 등)에서는 이 기기 브라우저
+let REMOTE=null,READONLY=false;
+function setSync(k,t){const el=$('#sync');el.className='sync '+k;el.querySelector('span').textContent=t}
+async function saveEntry(day,id,body){
+  if(REMOTE){await REMOTE.collection('sched').doc(day+'_'+id).set(Object.assign({},body,{date:day,member:id,savedAt:Date.now()}));return}
+  persist();
+}
+async function removeEntry(day,id){
+  if(REMOTE){await REMOTE.collection('sched').doc(day+'_'+id).delete();return}
+  persist();
+}
+async function initRemote(){
+  const use=window.claude&&window.claude.use;
+  if(!use){setSync('warn','이 기기에만 저장돼요');return}
+  let db=null;try{db=await window.claude.use('db')}catch(e){}
+  if(!db){setSync('warn','이 기기에만 저장돼요');return}
+  try{const u=await window.claude.use('user');if(u){const id=await u.id();if(id)MYID=id;const w=await u.can('data.write');if(w===false)READONLY=true;}}catch(e){}
+  REMOTE=db;DB={days:{}};renderAll();setSync('','팀 데이터 불러오는 중');
+  const timer=setTimeout(()=>setSync('warn','팀 데이터 연결이 늦어지고 있어요'),10000);
+  db.collection('sched').onSnapshot(snap=>{
+    const days={};
+    snap.docs.forEach(d=>{const v=d.data();if(!v||!v.date||!v.member)return;const e=Object.assign({},v);delete e.date;delete e.member;delete e.savedAt;(days[v.date]=days[v.date]||{})[v.member]=e});
+    DB.days=days;renderAll();
+    if(!snap.metadata.fromCache){clearTimeout(timer);setSync(READONLY?'warn':'ok',READONLY?'보기 전용 권한이에요 · 팀장에게 입력 권한 요청':'팀 공유 저장 중')}
+  },()=>{clearTimeout(timer);setSync('err','팀 데이터 연결 오류 · 새로고침 해주세요')});
+}
+
+addEventListener('resize',()=>{clearTimeout(window._rz);window._rz=setTimeout(renderMap,150)});
+defaultHalf();
+// 페이지를 켜둔 채 오후 1시가 지나면 오늘 지도를 오후로 자동 전환
+let autoPM=new Date().getHours()>=13;
+setInterval(()=>{const pm=new Date().getHours()>=13;if(pm&&!autoPM&&sel===ymd(today)&&half==='am'){half='pm';document.querySelectorAll('#halfSeg button').forEach(x=>x.classList.toggle('on',x.dataset.h==='pm'));renderMap(true)}autoPM=pm},60000);
+renderLock();
+$('#todayPill').textContent='오늘 '+dayLabel(ymd(today));
+renderAll();
+initRemote();
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>renderMap());
+new MutationObserver(()=>renderMap()).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+</script>
+
+</body></html>
